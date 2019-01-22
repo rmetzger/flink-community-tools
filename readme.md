@@ -1,0 +1,45 @@
+# Flink Community Tools
+
+## Pull request review status bot for GitHub
+
+Description: This effort is related to [this pull request](https://github.com/apache/flink/pull/6873).
+On each new pull request, automatically post a comment with the following contents:
+```
+# Review Progress
+
+* [ ] 1. The [contribution] is well-described.
+* [ ] 2. There is [consensus] that the contribution should go into to Flink.
+* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]
+* [ ] 4. The [architecture] is sound.
+* [ ] 5. Overall code [quality] is good.
+
+Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.
+```
+
+Check each subsequent comment for a mention:
+
+* `@flinkbot /contribution approve`: Update original comment and put the author as a approver of a review
+* `@flinkbot /contribution disapprove`: Remove author as an approver
+* .. add approve / disapprove for `contribution`, `consensus`, `architecture`, `architecture`
+* For `/attention @fhueske` add the name to the list of "attention payers".
+
+After a series of comments, the review progress could for example look like this:
+
+```
+# Review Progress
+
+* [ ] 1. The [contribution] is well-described.
+    - Approved by @twalthr [PMC], @johndoe 
+* [ ] 2. There is [consensus] that the contribution should go into to Flink.
+* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]
+* [ ] 4. The [architecture] is sound.
+    - Approved by @pnowojski [PMC], @johndoe
+* [ ] 5. Overall code [quality] is good.
+
+Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.
+```
+
+## Future projects
+* Flink community metrics
+* Pull requests dashboard
+* Automatic labeling of pull requests
