@@ -5,6 +5,10 @@
 Description: This effort is related to [this pull request](https://github.com/apache/flink/pull/6873).
 On each new pull request, automatically post a comment with the following contents:
 ```
+Thanks a lot for your contribution to the Apache Flink project. I'm the @flinkbot. I help the community
+to review your pull request. We will use this comment to track the progress of the review.
+
+
 # Review Progress
 
 * [ ] 1. The [contribution] is well-described.
@@ -40,6 +44,7 @@ Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-pr
 ```
 
 ## Future projects
+* For the PR bot, put a label whether a PR is ready to merge
 * Flink community metrics
 * Pull requests dashboard
 * Automatic labeling of pull requests

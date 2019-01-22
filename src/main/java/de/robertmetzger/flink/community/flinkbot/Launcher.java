@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,12 +26,27 @@ public class Launcher {
         int checkNewActionsSeconds = Integer.valueOf(prop.getProperty("main.checkNewActionsSeconds"));
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(bot::checkForNewPRs, 0, checkNewPRSeconds, TimeUnit.SECONDS);
+        /* executor.scheduleAtFixedRate(() -> {
+            try {
+                bot.checkForNewPRs();
+            } catch (Throwable t) {
+                System.out.println("E: "+ t.getMessage());
+                t.printStackTrace();
+            }
+        }, 0, checkNewPRSeconds, TimeUnit.SECONDS); */
 
         executor.scheduleAtFixedRate(
-                bot::checkForNewActions,
-                checkNewPRSeconds / 2,
-                checkNewActionsSeconds,
-                TimeUnit.SECONDS);
+            () -> {
+                try {
+                    bot.checkForNewActions();
+                } catch (Throwable t) {
+                    System.out.println("E: "+ t.getMessage());
+                    t.printStackTrace();
+                }
+            },
+            //checkNewPRSeconds / 2,
+            0,
+            checkNewActionsSeconds,
+            TimeUnit.SECONDS);
     }
 }
