@@ -6,7 +6,7 @@ import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
 
 import java.io.IOException;
-import java.sql.SQLOutput;
+
 import java.util.*;
 
 public class Flinkbot {
@@ -101,7 +101,10 @@ public class Flinkbot {
      *
      * @param comments all comments of a PR
      */
-    private void processBotMentions(List<GHIssueComment> comments) {
+    /*private*/ void processBotMentions(List<GHIssueComment> comments) {
+        if(comments == null) {
+            return;
+        }
         GHIssueComment trackingComment = null;
         Map<String, List<String>> approvals = new HashMap<>();
         List<String> attention = new ArrayList<>();
@@ -179,14 +182,16 @@ public class Flinkbot {
             for(String line: messageLines) {
                 // first, we always copy the original line
                 newComment.append(line);
+                newComment.append("\n");
                 // then, we decide whether we add something
                 for(String approval: VALID_APPROVALS) {
-                    if(line.contains(approval)) {
+                    if(line.contains("[" + approval + "]")) {
                        String append = "    - Approved by ";
                        List<String> approvers = approvals.get(approval);
                        if(approvers != null) {
                            append += StringUtils.join(approvers, ", ");
                            newComment.append(append);
+                           newComment.append("\n");
                        }
                     }
                 }
@@ -195,11 +200,17 @@ public class Flinkbot {
                     if(attention.size() > 0) {
                         append += StringUtils.join(attention, ", ");
                         newComment.append(append);
+                        newComment.append("\n");
                     }
                 }
             }
             try {
-                trackingComment.update(newComment.toString());
+                newComment.deleteCharAt(newComment.length()-1); // remove trailing newline
+                String newCommentString = newComment.toString();
+                if(!newCommentString.equals(trackingComment.getBody())) {
+                    // need to update
+                    trackingComment.update(newCommentString);
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Err",e);
             }
