@@ -1,16 +1,18 @@
 package de.robertmetzger.flink.community.flinkbot;
 
-import org.apache.commons.collections4.list.SetUniqueList;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 import java.util.*;
 
 public class Flinkbot {
+    private static Logger LOG = LoggerFactory.getLogger(Flinkbot.class);
 
     private static final String BOT_NAME = "@flinkbot";
     private static final String TRACKING_MESSAGE = "Thanks a lot for your contribution to the Apache Flink project. I'm the "+BOT_NAME+". I help the community\n" +
@@ -34,7 +36,7 @@ public class Flinkbot {
     public Flinkbot(Github gh) {
         this.gh = gh;
         if(!("@"+gh.getBotName()).equals(BOT_NAME)) {
-            throw new RuntimeException("Something is wrong");
+            throw new RuntimeException("Wrong hardcoded bot name");
         }
     }
 
@@ -46,20 +48,20 @@ public class Flinkbot {
         List<GHIssue> prs = gh.getAllPullRequests();
         // remove all PRs we've commented on already
         prs.removeIf(pr -> {
-            System.out.println("Checking PR " + pullToSimpleString(pr));
+            LOG.info("Checking PR " + pullToSimpleString(pr));
             return pullRequestHasComment(pr);
         });
 
         // put comment
         for (GHIssue pr : prs) {
-            System.out.println("Commenting on PR " + pullToSimpleString(pr));
+            LOG.info("Commenting on PR " + pullToSimpleString(pr));
             try {
                 pr.comment(TRACKING_MESSAGE);
             } catch (IOException e) {
-                throw new RuntimeException("err", e);
+                LOG.warn("Error writing tracking message", e);
             }
         }
-        System.out.println("Done checking for new PRs. Requests remaining: " + gh.getRemainingRequests());
+        LOG.info("Done checking for new PRs. Requests remaining: " + gh.getRemainingRequests());
     }
     private boolean pullRequestHasComment(GHIssue pr) {
         try {
@@ -73,9 +75,8 @@ public class Flinkbot {
                 return false;
             });
         } catch (IOException e) {
-            // fail
-            e.printStackTrace();
-            throw new RuntimeException("err", e);
+            LOG.warn("Error checking for comment", e);
+            return false;
         }
     }
 
@@ -91,7 +92,7 @@ public class Flinkbot {
             try {
                 notification.getNotification().markAsRead();
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.warn("Error marking notification as read", e);
             }
         }
     }
@@ -122,24 +123,24 @@ public class Flinkbot {
                         for(int i = 0; i < tokens.length; i++) {
                             if(tokens[i].equals(BOT_NAME)) {
                                 if(i+2 >= tokens.length) {
-                                    System.out.println("Incomplete command in: " + line);
+                                    LOG.debug("Incomplete command in: " + line);
                                     break; // stop processing this line
                                 }
                                 String action = tokens[i+1].toLowerCase();
                                 String approval = tokens[i+2].toLowerCase();
                                 if(action.equals("attention")) {
                                     if(approval.substring(0,1).equals("@")) {
-                                        attention.add(approval);
+                                        attention.add(approval.trim());
                                     }
                                     // look for more names
                                     for(int j = i + 3; j < tokens.length; j++) {
                                         if(tokens[j].substring(0,1).equals("@")) {
-                                            attention.add(tokens[j]);
+                                            attention.add(tokens[j].trim());
                                         }
                                     }
                                 } else if(action.equals("approve") || action.equals("disapprove")) {
                                     if(!ArrayUtils.contains(VALID_APPROVALS, approval)) {
-                                        System.out.println("Invalid approval/aspect in " + line);
+                                        LOG.debug("Invalid approval/aspect in " + line);
                                         break;
                                     }
                                     if(action.equals("approve")) {
@@ -159,7 +160,7 @@ public class Flinkbot {
                                         approvals.put(approval, approver);
                                     }
                                 } else {
-                                    System.out.println("Incomplete command in: " + line);
+                                    LOG.debug("Incomplete command in: " + line);
                                     break; // stop processing this line
                                 }
                             }
@@ -167,15 +168,14 @@ public class Flinkbot {
                     }
                 }
             } catch (Throwable t) {
-                System.out.println("Error processing comment '"+comment.getBody()+"'. Msg: "+t.getMessage());
-                t.printStackTrace();
+                LOG.warn("Error processing comment '"+comment.getBody()+"'. Msg: "+t.getMessage(), t);
             }
 
         }
 
         // update tracking comment
         if(trackingComment == null) {
-            System.out.println("Invalid notification? comments do not contain tracking message " + comments);
+            LOG.info("Invalid notification? comments do not contain tracking message " + comments);
         } else {
             // generate comment
             StringBuffer newComment = new StringBuffer();
@@ -217,7 +217,7 @@ public class Flinkbot {
                     trackingComment.update(newCommentString);
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Err",e);
+                LOG.warn("Error updating tracking comment", e);
             }
         }
     }

@@ -1,18 +1,23 @@
 package de.robertmetzger.flink.community.flinkbot;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Launch the bot
  */
 public class Launcher {
+    private static Logger LOG = LoggerFactory.getLogger(Launcher.class);
+
     public static void main(String[] args) {
-        System.out.println("Launching @flinkbot");
+        LOG.info("Launching @flinkbot");
+        System.exit(0);
 
         Properties prop = new Properties();
         try {
@@ -26,12 +31,16 @@ public class Launcher {
         int checkNewActionsSeconds = Integer.valueOf(prop.getProperty("main.checkNewActionsSeconds"));
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
+        // TODO
+        // - retrieve PRs only from a certain PR number. limit number of PR requests
+        // - avoid concurrent API use from the schedulers.
+
         /* executor.scheduleAtFixedRate(() -> {
             try {
                 bot.checkForNewPRs();
             } catch (Throwable t) {
-                System.out.println("E: "+ t.getMessage());
-                t.printStackTrace();
+                LOG.warn("Error while checking for new PRs", t);
             }
         }, 0, checkNewPRSeconds, TimeUnit.SECONDS); */
 
@@ -40,8 +49,7 @@ public class Launcher {
                 try {
                     bot.checkForNewActions();
                 } catch (Throwable t) {
-                    System.out.println("E: "+ t.getMessage());
-                    t.printStackTrace();
+                    LOG.warn("Error while checking for new actions", t);
                 }
             },
             //checkNewPRSeconds / 2,

@@ -6,12 +6,16 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.OkUrlFactory;
 import org.kohsuke.github.*;
 import org.kohsuke.github.extras.OkHttpConnector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 public class Github {
+    private static Logger LOG = LoggerFactory.getLogger(Github.class);
+
     private final GitHub gitHub;
 
     private final String repository;
@@ -44,7 +48,8 @@ public class Github {
             allIssues.removeIf(issue -> !issue.isPullRequest());
             return allIssues;
         } catch (IOException e) {
-            throw new RuntimeException("err", e);
+            LOG.warn("Error getting pull requests", e);
+            return new ArrayList<>();
         }
     }
 
@@ -56,7 +61,8 @@ public class Github {
         try {
             return gitHub.getRateLimit().remaining;
         } catch (IOException e) {
-            throw new RuntimeException("err", e);
+            LOG.info("Unable to get current rate limit", e);
+            return -1;
         }
     }
 
@@ -70,9 +76,10 @@ public class Github {
         Iterator<GHThread> iter = notifications.iterator();
         List<NotificationAndComments> result = new ArrayList<>();
 
-        System.out.println("Getting notifications");
+        LOG.info("Getting notifications");
         while(iter.hasNext()) {
             GHThread ele = iter.next();
+            LOG.debug("Found a notification " + ele);
             if(ele.getReason().equals("mention")) {
                 try {
                     List<GHIssueComment> comments = ele.getBoundPullRequest().getComments();
@@ -81,20 +88,19 @@ public class Github {
                         try {
                             return o1.getCreatedAt().compareTo(o2.getCreatedAt());
                         } catch (IOException e) {
-                            throw new RuntimeException("err", e);
+                            // Throw an exception here. IOExceptions should not happen (It's a mistake by the library)
+                            LOG.warn("Error while sorting", e);
+                            throw new RuntimeException("Error while sorting", e);
                         }
                     });
                     result.add(new NotificationAndComments(ele, comments));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOG.warn("Error while getting comments", e);
                 }
             }
         }
-        try {
-            System.out.println("Done checking notifications " + gitHub.getRateLimit().remaining);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        LOG.info("Done checking notifications. Requests remaining: " + getRemainingRequests());
         return result;
     }
 

@@ -183,7 +183,7 @@ public class FlinkbotTest {
         comments.add(getComment("@flinkbot approve consensus", "trohrmann"));
         comments.add(getComment("@flinkbot approve contribution", "rmetzger"));
         comments.add(getComment("@flinkbot disapprove consensus", "trohrmann"));
-        comments.add(getComment("@flinkbot attention @uce @rmetzger @test", "trohrmann"));
+        comments.add(getComment("@flinkbot attention @uce @rmetzger @test\n\n", "trohrmann"));
         comments.add(getComment("@flinkbot attention @test @rmetzger", "test2"));
         comments.add(getComment("@flinkbot attention @test2", "test"));
         comments.add(getComment("@flinkbot attention @test2", "test"));
@@ -248,7 +248,7 @@ public class FlinkbotTest {
         comments.add(getComment("@flinkbot approve consensus", "trohrmann"));
         comments.add(getComment("@flinkbot approve contribution", "rmetzger"));
         comments.add(getComment("@flinkbot disapprove consensus", "trohrmann"));
-        comments.add(getComment("@flinkbot attention @uce", "trohrmann"));
+        comments.add(getComment("@flinkbot attention @uce\n", "trohrmann"));
         comments.add(getComment("ASDjifejoi fjoif aweof pojaewf ijwef jiwg rjeg ijreg ", "rmetzger"));
         comments.add(getComment("@flinkbot approve contribution", "hansi"));
 

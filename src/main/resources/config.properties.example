@@ -1,0 +1,8 @@
+gh.user = flinkbot
+gh.token =
+gh.repo = flinkbot/test-repo
+
+main.checkNewPRSeconds = 3030
+main.checkNewActionsSeconds = 30
+main.cacheMB = 10
+main.cacheDir = /tmp/flinkbot
