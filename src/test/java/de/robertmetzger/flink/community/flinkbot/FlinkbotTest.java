@@ -110,7 +110,7 @@ public class FlinkbotTest {
                 "## Review Progress\n" +
                 "\n" +
                 "* [ ] 1. The [contribution] is well-described.\n" +
-                "    - Approved by @fhueske, @rmetzger\n" +
+                "    - Approved by @fhueske, @trohrmann\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "    - Needs attention by @uce\n" +
@@ -127,11 +127,49 @@ public class FlinkbotTest {
 
         comments.add(getComment(TRACKING_MESSAGE, "flinkbot"));
         comments.add(getComment("@flinkbot approve contribution", "fhueske"));
-        comments.add(getComment("@flinkbot approve consensus", "trohrmann"));
-        comments.add(getComment("@flinkbot approve contribution", "rmetzger"));
+        comments.add(getComment("@flinkbot approve consensus\n@flinkbot approve contribution\n@flinkbot attention @uce", "trohrmann"));
         comments.add(getComment("@flinkbot disapprove consensus", "trohrmann"));
-        comments.add(getComment("@flinkbot attention @uce", "trohrmann"));
 
+
+        bot.processBotMentions(comments);
+
+        ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
+        verify(comments.get(0)).update(argument.capture());
+        assertEquals(EXPECTED, argument.getValue());
+    }
+
+
+    /**
+     * "approve all" should work
+     */
+    @Test
+    public void testProcessBotMentionsApproveAll() throws IOException {
+        final String EXPECTED = "Thanks a lot for your contribution to the Apache Flink project. I'm the @flinkbot. I help the community\n" +
+                "to review your pull request. We will use this comment to track the progress of the review.\n" +
+                "\n" +
+                "\n" +
+                "## Review Progress\n" +
+                "\n" +
+                "* [ ] 1. The [contribution] is well-described.\n" +
+                "    - Approved by @fhueske\n" +
+                "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "    - Approved by @fhueske\n" +
+                "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* [ ] 4. The [architecture] is sound.\n" +
+                "    - Approved by @fhueske\n" +
+                "* [ ] 5. Overall code [quality] is good.\n" +
+                "    - Approved by @fhueske\n" +
+                "\n" +
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.";
+
+        Github gh = mock(Github.class);
+        when(gh.getBotName()).thenReturn("flinkbot");
+
+        Flinkbot bot = new Flinkbot(gh);
+        List<GHIssueComment> comments = new ArrayList<>();
+
+        comments.add(getComment(TRACKING_MESSAGE, "flinkbot"));
+        comments.add(getComment("@flinkbot approve all", "fhueske"));
 
         bot.processBotMentions(comments);
 

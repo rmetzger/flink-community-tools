@@ -43,6 +43,13 @@ After a series of comments, the review progress could for example look like this
 Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.
 ```
 
+### Feature requests
+
+* [ ] could it add the mentioned person to `reviewers`, when using `@flinkbot attention`
+* [ ] could it tick the boxes?
+* [x] support `approve all`
+
+
 ## Future projects
 * For the PR bot, put a label whether a PR is ready to merge
 * Flink community metrics

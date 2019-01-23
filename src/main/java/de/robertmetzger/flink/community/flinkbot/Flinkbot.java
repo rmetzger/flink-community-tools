@@ -131,8 +131,8 @@ public class Flinkbot {
                                     LOG.debug("Incomplete command in: " + line);
                                     break; // stop processing this line
                                 }
-                                String action = tokens[i+1].toLowerCase();
-                                String approval = tokens[i+2].toLowerCase();
+                                String action = tokens[i+1].toLowerCase().trim();
+                                String approval = tokens[i+2].toLowerCase().trim();
                                 if(action.equals("attention")) {
                                     if(approval.substring(0,1).equals("@")) {
                                         attention.add(approval.trim());
@@ -144,17 +144,18 @@ public class Flinkbot {
                                         }
                                     }
                                 } else if(action.equals("approve") || action.equals("disapprove")) {
-                                    if(!ArrayUtils.contains(VALID_APPROVALS, approval)) {
+                                    if(!ArrayUtils.contains(VALID_APPROVALS, approval) && !approval.equals("all")) {
                                         LOG.debug("Invalid approval/aspect in " + line);
                                         break;
                                     }
                                     if(action.equals("approve")) {
-                                        Set<String> approver = approvals.get(approval);
-                                        if(approver == null) {
-                                            approver = new HashSet<>();
+                                        if(approval.equals("all")) {
+                                            for(String validApproval: VALID_APPROVALS) {
+                                                addApproval(approvals, validApproval, comment.getUserName());
+                                            }
+                                        } else {
+                                            addApproval(approvals, approval, comment.getUserName());
                                         }
-                                        approver.add("@"+comment.getUserName());
-                                        approvals.put(approval, approver);
                                     }
                                     if(action.equals("disapprove")) {
                                         Set<String> approver = approvals.get(approval);
@@ -227,6 +228,14 @@ public class Flinkbot {
         }
     }
 
+    private static void addApproval(Map<String, Set<String>> approvals, String approvalName, String userName) {
+        Set<String> approver = approvals.get(approvalName);
+        if (approver == null) {
+            approver = new HashSet<>();
+        }
+        approver.add("@" + userName);
+        approvals.put(approvalName, approver);
+    }
     private static String pullToSimpleString(GHIssue pr) {
         return "#" + pr.getNumber() + ": " + pr.getTitle();
     }
