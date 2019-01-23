@@ -22,10 +22,10 @@ Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-pr
 
 Check each subsequent comment for a mention:
 
-* `@flinkbot /contribution approve`: Update original comment and put the author as a approver of a review
-* `@flinkbot /contribution disapprove`: Remove author as an approver
+* `@flinkbot contribution approve`: Update original comment and put the author as a approver of a review
+* `@flinkbot contribution disapprove`: Remove author as an approver
 * .. add approve / disapprove for `contribution`, `consensus`, `architecture`, `architecture`
-* For `/attention @fhueske` add the name to the list of "attention payers".
+* For `attention @fhueske` add the name to the list of "attention payers".
 
 After a series of comments, the review progress could for example look like this:
 
@@ -47,4 +47,8 @@ Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-pr
 * For the PR bot, put a label whether a PR is ready to merge
 * Flink community metrics
 * Pull requests dashboard
-* Automatic labeling of pull requests
+* Automatic labeling of pull requests (into project components)
+
+## License
+
+MIT License (see `license` file).

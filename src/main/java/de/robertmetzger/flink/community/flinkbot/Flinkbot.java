@@ -1,5 +1,6 @@
 package de.robertmetzger.flink.community.flinkbot;
 
+import org.apache.commons.collections4.list.SetUniqueList;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.GHIssue;
@@ -106,8 +107,8 @@ public class Flinkbot {
             return;
         }
         GHIssueComment trackingComment = null;
-        Map<String, List<String>> approvals = new HashMap<>();
-        List<String> attention = new ArrayList<>();
+        Map<String, Set<String>> approvals = new HashMap<>();
+        Set<String> attention = new HashSet<>();
         for(GHIssueComment comment: comments) {
             if(isTrackingMessage(comment.getBody())) {
                 trackingComment = comment;
@@ -131,7 +132,7 @@ public class Flinkbot {
                                         attention.add(approval);
                                     }
                                     // look for more names
-                                    for(int j = i + 2; j < tokens.length; j++) {
+                                    for(int j = i + 3; j < tokens.length; j++) {
                                         if(tokens[j].substring(0,1).equals("@")) {
                                             attention.add(tokens[j]);
                                         }
@@ -142,17 +143,17 @@ public class Flinkbot {
                                         break;
                                     }
                                     if(action.equals("approve")) {
-                                        List<String> approver = approvals.get(approval);
+                                        Set<String> approver = approvals.get(approval);
                                         if(approver == null) {
-                                            approver = new ArrayList<>();
+                                            approver = new HashSet<>();
                                         }
                                         approver.add("@"+comment.getUserName());
                                         approvals.put(approval, approver);
                                     }
                                     if(action.equals("disapprove")) {
-                                        List<String> approver = approvals.get(approval);
+                                        Set<String> approver = approvals.get(approval);
                                         if(approver == null) {
-                                            approver = new ArrayList<>();
+                                            approver = new HashSet<>();
                                         }
                                         approver.remove("@"+comment.getUserName());
                                         approvals.put(approval, approver);
@@ -187,8 +188,10 @@ public class Flinkbot {
                 for(String approval: VALID_APPROVALS) {
                     if(line.contains("[" + approval + "]")) {
                        String append = "    - Approved by ";
-                       List<String> approvers = approvals.get(approval);
-                       if(approvers != null) {
+                       Set<String> approversSet = approvals.get(approval);
+                       if(approversSet != null && approversSet.size() > 0) {
+                           List<String> approvers = new ArrayList<>(approversSet);
+                           Collections.sort(approvers); // equality
                            append += StringUtils.join(approvers, ", ");
                            newComment.append(append);
                            newComment.append("\n");
@@ -198,7 +201,9 @@ public class Flinkbot {
                 if(line.contains("attention")) {
                     String append = "    - Needs attention by ";
                     if(attention.size() > 0) {
-                        append += StringUtils.join(attention, ", ");
+                        List<String> attSorted = new ArrayList<>(attention);
+                        Collections.sort(attSorted);
+                        append += StringUtils.join(attSorted, ", ");
                         newComment.append(append);
                         newComment.append("\n");
                     }
