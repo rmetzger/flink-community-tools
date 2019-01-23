@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,7 +21,11 @@ public class Launcher {
 
         Properties prop = new Properties();
         try {
-            prop.load(Launcher.class.getResourceAsStream("/config.properties"));
+            InputStream config = Launcher.class.getResourceAsStream("/config.properties");
+            if(config == null) {
+                throw new RuntimeException("Unable to load /config.properties from the CL. CP: " + System.getProperty("java.class.path"));
+            }
+            prop.load(config);
         } catch (IOException e) {
             throw new RuntimeException("Unable to load /config.properties from the CL", e);
         }

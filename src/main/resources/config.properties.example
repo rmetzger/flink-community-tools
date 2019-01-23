@@ -3,7 +3,7 @@ gh.token =
 gh.repo = flinkbot/test-repo
 gh.minPRNumber = 0
 
-main.checkNewPRSeconds = 3030
+main.checkNewPRSeconds = 30
 main.checkNewActionsSeconds = 30
 main.cacheMB = 10
 main.cacheDir = /tmp/flinkbot
