@@ -1,1 +1,4 @@
 .idea/
+target
+bot.log
+src/main/resources/config.properties

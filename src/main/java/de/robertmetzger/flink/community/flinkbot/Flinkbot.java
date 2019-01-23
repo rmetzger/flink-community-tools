@@ -43,18 +43,20 @@ public class Flinkbot {
     /**
      * Check if there are new pull requests w/o a managed comment yet.
      *  Create comment
+     *
+     * The method is synchronized, to avoid multiple threads concurrently processing new PRs.
      */
-    public void checkForNewPRs() {
+    public synchronized void checkForNewPRs() {
         List<GHIssue> prs = gh.getAllPullRequests();
         // remove all PRs we've commented on already
         prs.removeIf(pr -> {
-            LOG.info("Checking PR " + pullToSimpleString(pr));
+            LOG.debug("Checking PR " + pullToSimpleString(pr));
             return pullRequestHasComment(pr);
         });
 
         // put comment
         for (GHIssue pr : prs) {
-            LOG.info("Commenting on PR " + pullToSimpleString(pr));
+            LOG.info("Commenting with tracking message on PR " + pullToSimpleString(pr));
             try {
                 pr.comment(TRACKING_MESSAGE);
             } catch (IOException e) {
@@ -84,7 +86,10 @@ public class Flinkbot {
         return body.substring(0, Math.min(body.length(), 10)).equals(TRACKING_MESSAGE.substring(0, 10));
     }
 
-    public void checkForNewActions() {
+    /**
+     * The method is synchronized, to avoid multiple threads concurrently processing new notifications.
+     */
+    public synchronized void checkForNewActions() {
         // get notifications
         List<Github.NotificationAndComments> notifications = gh.getNewNotifications();
         for(Github.NotificationAndComments notification: notifications) {

@@ -19,6 +19,11 @@ public class Github {
     private final GitHub gitHub;
 
     private final String repository;
+    /**
+     * Defines the minimum PR number of the bot to consider a PR.
+     * Idea: only apply the bot to new Flink PRs.
+     */
+    private final int minPRNumber;
     private String botName;
 
     public Github(Properties prop) {
@@ -38,14 +43,19 @@ public class Github {
             throw new RuntimeException("Error initializing GitHub", e);
         }
         repository = prop.getProperty("gh.repo");
+        minPRNumber = Integer.valueOf(prop.getProperty("gh.minPRNumber"));
     }
 
+    /**
+     * Gets all open pull requests (treated as issues)
+     */
     public List<GHIssue> getAllPullRequests() {
         try {
             GHRepository repo = gitHub.getRepository(repository);
             List<GHIssue> allIssues = repo.getIssues(GHIssueState.OPEN);
             // remove issues, keep PRs
             allIssues.removeIf(issue -> !issue.isPullRequest());
+            allIssues.removeIf(issue -> issue.getNumber() < minPRNumber);
             return allIssues;
         } catch (IOException e) {
             LOG.warn("Error getting pull requests", e);

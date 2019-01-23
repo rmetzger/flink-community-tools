@@ -17,7 +17,6 @@ public class Launcher {
 
     public static void main(String[] args) {
         LOG.info("Launching @flinkbot");
-        System.exit(0);
 
         Properties prop = new Properties();
         try {
@@ -32,17 +31,13 @@ public class Launcher {
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
-        // TODO
-        // - retrieve PRs only from a certain PR number. limit number of PR requests
-        // - avoid concurrent API use from the schedulers.
-
-        /* executor.scheduleAtFixedRate(() -> {
+        executor.scheduleAtFixedRate(() -> {
             try {
                 bot.checkForNewPRs();
             } catch (Throwable t) {
                 LOG.warn("Error while checking for new PRs", t);
             }
-        }, 0, checkNewPRSeconds, TimeUnit.SECONDS); */
+        }, 0, checkNewPRSeconds, TimeUnit.SECONDS);
 
         executor.scheduleAtFixedRate(
             () -> {
@@ -52,8 +47,7 @@ public class Launcher {
                     LOG.warn("Error while checking for new actions", t);
                 }
             },
-            //checkNewPRSeconds / 2,
-            0,
+            checkNewPRSeconds / 2,
             checkNewActionsSeconds,
             TimeUnit.SECONDS);
     }

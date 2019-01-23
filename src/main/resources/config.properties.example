@@ -1,6 +1,7 @@
 gh.user = flinkbot
 gh.token =
 gh.repo = flinkbot/test-repo
+gh.minPRNumber = 0
 
 main.checkNewPRSeconds = 3030
 main.checkNewActionsSeconds = 30
