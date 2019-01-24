@@ -73,7 +73,7 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [ ] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [contribution] is well-described.\n" +
                 "    - Approved by @fhueske\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
@@ -109,10 +109,10 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [ ] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [contribution] is well-described.\n" +
                 "    - Approved by @fhueske, @trohrmann\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "    - Needs attention by @uce\n" +
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
@@ -150,14 +150,14 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [ ] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [contribution] is well-described.\n" +
                 "    - Approved by @fhueske\n" +
-                "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* [x] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "    - Approved by @fhueske\n" +
                 "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-                "* [ ] 4. The [architecture] is sound.\n" +
+                "* [x] 4. The [architecture] is sound.\n" +
                 "    - Approved by @fhueske\n" +
-                "* [ ] 5. Overall code [quality] is good.\n" +
+                "* [x] 5. Overall code [quality] is good.\n" +
                 "    - Approved by @fhueske\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.";
@@ -193,15 +193,15 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [ ] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [contribution] is well-described.\n" +
                 "    - Approved by @fhueske, @rmetzger\n" +
-                "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* [x] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "    - Approved by @test\n" +
-                "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "    - Needs attention by @rmetzger, @test, @test2, @uce\n" +
-                "* [ ] 4. The [architecture] is sound.\n" +
+                "* [x] 4. The [architecture] is sound.\n" +
                 "    - Approved by @test\n" +
-                "* [ ] 5. Overall code [quality] is good.\n" +
+                "* [x] 5. Overall code [quality] is good.\n" +
                 "    - Approved by @test\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.";
@@ -249,10 +249,10 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [ ] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [contribution] is well-described.\n" +
                 "    - Approved by @fhueske, @rmetzger\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "    - Needs attention by @uce\n" +
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
@@ -264,10 +264,10 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [ ] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [contribution] is well-described.\n" +
                 "    - Approved by @fhueske, @hansi, @rmetzger\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "    - Needs attention by @uce\n" +
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +

@@ -187,10 +187,10 @@ public class Flinkbot {
             StringBuffer newComment = new StringBuffer();
             String[] messageLines = TRACKING_MESSAGE.split("\n");
             for(String line: messageLines) {
-                // first, we always copy the original line
-                newComment.append(line);
-                newComment.append("\n");
-                // then, we decide whether we add something
+
+                // decide whether we add something
+                boolean tick = false;
+                String nextLine = null;
                 for(String approval: VALID_APPROVALS) {
                     if(line.contains("[" + approval + "]")) {
                        String append = "    - Approved by ";
@@ -199,8 +199,8 @@ public class Flinkbot {
                            List<String> approvers = new ArrayList<>(approversSet);
                            Collections.sort(approvers); // equality
                            append += StringUtils.join(approvers, ", ");
-                           newComment.append(append);
-                           newComment.append("\n");
+                           nextLine = append;
+                           tick = true;
                        }
                     }
                 }
@@ -210,9 +210,21 @@ public class Flinkbot {
                         List<String> attSorted = new ArrayList<>(attention);
                         Collections.sort(attSorted);
                         append += StringUtils.join(attSorted, ", ");
-                        newComment.append(append);
-                        newComment.append("\n");
+                        nextLine = append;
+                        tick = true;
                     }
+                }
+                // copy the original line
+                if(tick) {
+                    newComment.append(line.replace("[ ]", "[x]"));
+                } else {
+                    newComment.append(line);
+                }
+
+                newComment.append("\n");
+                if(nextLine != null) {
+                    newComment.append(nextLine);
+                    newComment.append("\n");
                 }
             }
             try {

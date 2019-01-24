@@ -46,8 +46,10 @@ Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-pr
 ### Feature requests
 
 * [ ] could it add the mentioned person to `reviewers`, when using `@flinkbot attention`
-* [ ] could it tick the boxes?
+* [x] could it tick the boxes?
 * [x] support `approve all`
+* [ ] if the bot is mentioned in a thread without a tracking message: post one (limit to configured repo)
+* [ ] attention-payers can tell the bot that they approve.
 
 
 ## Future projects
@@ -55,6 +57,11 @@ Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-pr
 * Flink community metrics
 * Pull requests dashboard
 * Automatic labeling of pull requests (into project components)
+* Automatic merging of pull requests by the bot
+	IF: 
+	- all review items have been approved
+	- travis is green
+	- a committer has labeled the PR to be merged
 
 ## License
 
