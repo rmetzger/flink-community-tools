@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Flinkbot {
     private static Logger LOG = LoggerFactory.getLogger(Flinkbot.class);
@@ -33,12 +34,17 @@ public class Flinkbot {
     private static final String[] VALID_APPROVALS = {"description", "consensus", "architecture", "quality"};
 
     private final Github gh;
+    private final String[] committers;
+    private final String[] pmc;
 
-    public Flinkbot(Github gh) {
+
+    public Flinkbot(Github gh, String[] committers, String[] pmc) {
         this.gh = gh;
         if(!("@"+gh.getBotName()).equals(BOT_NAME)) {
             throw new RuntimeException("Wrong hardcoded bot name");
         }
+        this.committers = committers;
+        this.pmc = pmc;
     }
 
     /**
@@ -199,7 +205,7 @@ public class Flinkbot {
                        if(approversSet != null && approversSet.size() > 0) {
                            List<String> approvers = new ArrayList<>(approversSet);
                            Collections.sort(approvers); // equality
-                           append += StringUtils.join(approvers, ", ");
+                           append += StringUtils.join(addCommunityStatus(approvers), ", ");
                            nextLine = append;
                            tick = true;
                        }
@@ -210,7 +216,7 @@ public class Flinkbot {
                     if(attention.size() > 0) {
                         List<String> attSorted = new ArrayList<>(attention);
                         Collections.sort(attSorted);
-                        append += StringUtils.join(attSorted, ", ");
+                        append += StringUtils.join(addCommunityStatus(attSorted), ", ");
                         nextLine = append;
                         tick = true;
                     }
@@ -239,6 +245,18 @@ public class Flinkbot {
                 LOG.warn("Error updating tracking comment", e);
             }
         }
+    }
+
+    private List<String> addCommunityStatus(List<String> ghLogins) {
+        return ghLogins.stream().map(login -> {
+            String noAt = login.replace("@", "");
+            if(ArrayUtils.contains(this.committers, noAt)) {
+                login += " [committer]";
+            } else if(ArrayUtils.contains(this.pmc, noAt)) {
+                login += " [PMC]";
+            }
+            return login;
+        }).collect(Collectors.toList());
     }
 
     private static void addApproval(Map<String, Set<String>> approvals, String approvalName, String userName) {

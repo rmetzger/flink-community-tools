@@ -31,6 +31,10 @@ public class FlinkbotTest {
             "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
             "questions about the review process or the usage of this bot";
 
+    private static String[] pmc = {"fhueske", "rmetzger"};
+    // this is obviously wrong information, for the same of testing only. sorry :(
+    private static String[] committer = {"trohrmann", "uce"};
+
     /**
      * Emtpy comment list
      */
@@ -39,7 +43,7 @@ public class FlinkbotTest {
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
 
-        Flinkbot bot = new Flinkbot(gh);
+        Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
         bot.processBotMentions(comments);
     }
@@ -52,7 +56,7 @@ public class FlinkbotTest {
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
 
-        Flinkbot bot = new Flinkbot(gh);
+        Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
@@ -75,7 +79,7 @@ public class FlinkbotTest {
                 "## Review Progress\n" +
                 "\n" +
                 "* [x] 1. The [description] looks good.\n" +
-                "    - Approved by @fhueske\n" +
+                "    - Approved by @fhueske [PMC]\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "* [ ] 4. The [architecture] is sound.\n" +
@@ -87,7 +91,7 @@ public class FlinkbotTest {
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
 
-        Flinkbot bot = new Flinkbot(gh);
+        Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
@@ -152,10 +156,10 @@ public class FlinkbotTest {
                 "## Review Progress\n" +
                 "\n" +
                 "* [x] 1. The [description] looks good.\n" +
-                "    - Approved by @fhueske, @trohrmann\n" +
+                "    - Approved by @fhueske [PMC], @trohrmann [committer]\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-                "    - Needs attention by @uce\n" +
+                "    - Needs attention by @uce [committer]\n" +
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
                 "\n" +
@@ -165,7 +169,7 @@ public class FlinkbotTest {
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
 
-        Flinkbot bot = new Flinkbot(gh);
+        Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
@@ -194,14 +198,14 @@ public class FlinkbotTest {
                 "## Review Progress\n" +
                 "\n" +
                 "* [x] 1. The [description] looks good.\n" +
-                "    - Approved by @fhueske\n" +
+                "    - Approved by @fhueske [PMC]\n" +
                 "* [x] 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "    - Approved by @fhueske\n" +
+                "    - Approved by @fhueske [PMC]\n" +
                 "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "* [x] 4. The [architecture] is sound.\n" +
-                "    - Approved by @fhueske\n" +
+                "    - Approved by @fhueske [PMC]\n" +
                 "* [x] 5. Overall code [quality] is good.\n" +
-                "    - Approved by @fhueske\n" +
+                "    - Approved by @fhueske [PMC]\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
                 "questions about the review process or the usage of this bot";
@@ -209,7 +213,7 @@ public class FlinkbotTest {
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
 
-        Flinkbot bot = new Flinkbot(gh);
+        Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
@@ -238,11 +242,11 @@ public class FlinkbotTest {
                 "## Review Progress\n" +
                 "\n" +
                 "* [x] 1. The [description] looks good.\n" +
-                "    - Approved by @fhueske, @rmetzger\n" +
+                "    - Approved by @fhueske [PMC], @rmetzger [PMC]\n" +
                 "* [x] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "    - Approved by @test\n" +
                 "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-                "    - Needs attention by @rmetzger, @test, @test2, @uce\n" +
+                "    - Needs attention by @rmetzger [PMC], @test, @test2, @uce [committer]\n" +
                 "* [x] 4. The [architecture] is sound.\n" +
                 "    - Approved by @test\n" +
                 "* [x] 5. Overall code [quality] is good.\n" +
@@ -254,7 +258,7 @@ public class FlinkbotTest {
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
 
-        Flinkbot bot = new Flinkbot(gh);
+        Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
@@ -295,10 +299,10 @@ public class FlinkbotTest {
                 "## Review Progress\n" +
                 "\n" +
                 "* [x] 1. The [description] looks good.\n" +
-                "    - Approved by @fhueske, @rmetzger\n" +
+                "    - Approved by @fhueske [PMC], @rmetzger [PMC]\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-                "    - Needs attention by @uce\n" +
+                "    - Needs attention by @uce [committer]\n" +
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
                 "\n" +
@@ -311,10 +315,10 @@ public class FlinkbotTest {
                 "## Review Progress\n" +
                 "\n" +
                 "* [x] 1. The [description] looks good.\n" +
-                "    - Approved by @fhueske, @hansi, @rmetzger\n" +
+                "    - Approved by @fhueske [PMC], @hansi, @rmetzger [PMC]\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-                "    - Needs attention by @uce\n" +
+                "    - Needs attention by @uce [committer]\n" +
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
                 "\n" +
@@ -324,7 +328,7 @@ public class FlinkbotTest {
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
 
-        Flinkbot bot = new Flinkbot(gh);
+        Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
 
         comments.add(createComment("Some other text here.", "rmetzger"));
@@ -364,7 +368,7 @@ public class FlinkbotTest {
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
 
-        Flinkbot bot = new Flinkbot(gh);
+        Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));

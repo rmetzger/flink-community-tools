@@ -7,3 +7,6 @@ main.checkNewPRSeconds = 30
 main.checkNewActionsSeconds = 30
 main.cacheMB = 10
 main.cacheDir = /tmp/flinkbot
+
+#main.committers = wuchong,andralungu,chiwanpark,KurtYoung,xccui,NicoK,StefanRRichter,pnowojski,kl0u,GJL,dawidwys,sunjincheng121,tweise,mjsax,shaoxuan-wang
+#main.pmc = StephanEwen,tillrohrmann,hsaputra,gyfora,uce,fhueske,zentol,aljoscha,rmetzger,twalthr,mbalassi,tzulitai,greghogan,warneke,vasia,alanfgates,mxm

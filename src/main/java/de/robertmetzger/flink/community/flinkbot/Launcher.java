@@ -1,5 +1,6 @@
 package de.robertmetzger.flink.community.flinkbot;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +30,14 @@ public class Launcher {
         } catch (IOException e) {
             throw new RuntimeException("Unable to load /config.properties from the CL", e);
         }
+
         Github gh = new Github(prop);
-        final Flinkbot bot = new Flinkbot(gh);
+        String[] committers = StringUtils.split(prop.getProperty("main.committers"), ',');
+        String[] pmc = StringUtils.split(prop.getProperty("main.pmc"), ',');
+        final Flinkbot bot = new Flinkbot(gh, committers, pmc);
+
+
+        // Schedule periodic checks
         int checkNewPRSeconds = Integer.valueOf(prop.getProperty("main.checkNewPRSeconds"));
         int checkNewActionsSeconds = Integer.valueOf(prop.getProperty("main.checkNewActionsSeconds"));
 
@@ -55,5 +62,6 @@ public class Launcher {
             checkNewPRSeconds / 2,
             checkNewActionsSeconds,
             TimeUnit.SECONDS);
+
     }
 }
