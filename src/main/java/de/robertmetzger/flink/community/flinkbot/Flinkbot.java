@@ -21,15 +21,16 @@ public class Flinkbot {
             "\n" +
             "## Review Progress\n" +
             "\n" +
-            "* [ ] 1. The [contribution] is well-described.\n" +
+            "* [ ] 1. The [description] looks good.\n" +
             "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
             "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
             "* [ ] 4. The [architecture] is sound.\n" +
             "* [ ] 5. Overall code [quality] is good.\n" +
             "\n" +
-            "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.";
+            "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
+            "questions about the review process or the usage of this bot";
 
-    private static final String[] VALID_APPROVALS = {"contribution", "consensus", "architecture", "quality"};
+    private static final String[] VALID_APPROVALS = {"description", "consensus", "architecture", "quality"};
 
     private final Github gh;
 

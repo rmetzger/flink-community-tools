@@ -22,13 +22,14 @@ public class FlinkbotTest {
             "\n" +
             "## Review Progress\n" +
             "\n" +
-            "* [ ] 1. The [contribution] is well-described.\n" +
+            "* [ ] 1. The [description] looks good.\n" +
             "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
             "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
             "* [ ] 4. The [architecture] is sound.\n" +
             "* [ ] 5. Overall code [quality] is good.\n" +
             "\n" +
-            "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.";
+            "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
+            "questions about the review process or the usage of this bot";
 
     /**
      * Emtpy comment list
@@ -63,7 +64,7 @@ public class FlinkbotTest {
     }
 
     /**
-     * Ensure a simple "contribution" approval works
+     * Ensure a simple "description" approval works
      */
     @Test
     public void testProcessBotMentionsSimple() throws IOException {
@@ -73,14 +74,15 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
+                "questions about the review process or the usage of this bot";
 
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
@@ -89,7 +91,7 @@ public class FlinkbotTest {
         List<GHIssueComment> comments = new ArrayList<>();
 
         comments.add(getComment(TRACKING_MESSAGE, "flinkbot"));
-        comments.add(getComment("@flinkbot approve contribution", "fhueske"));
+        comments.add(getComment("@flinkbot approve description", "fhueske"));
 
         bot.processBotMentions(comments);
 
@@ -109,7 +111,7 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske, @trohrmann\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
@@ -117,7 +119,8 @@ public class FlinkbotTest {
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
+                "questions about the review process or the usage of this bot";
 
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
@@ -126,8 +129,8 @@ public class FlinkbotTest {
         List<GHIssueComment> comments = new ArrayList<>();
 
         comments.add(getComment(TRACKING_MESSAGE, "flinkbot"));
-        comments.add(getComment("@flinkbot approve contribution", "fhueske"));
-        comments.add(getComment("@flinkbot approve consensus\n@flinkbot approve contribution\n@flinkbot attention @uce", "trohrmann"));
+        comments.add(getComment("@flinkbot approve description", "fhueske"));
+        comments.add(getComment("@flinkbot approve consensus\n@flinkbot approve description\n@flinkbot attention @uce", "trohrmann"));
         comments.add(getComment("@flinkbot disapprove consensus", "trohrmann"));
 
 
@@ -150,7 +153,7 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske\n" +
                 "* [x] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "    - Approved by @fhueske\n" +
@@ -160,7 +163,8 @@ public class FlinkbotTest {
                 "* [x] 5. Overall code [quality] is good.\n" +
                 "    - Approved by @fhueske\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
+                "questions about the review process or the usage of this bot";
 
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
@@ -193,7 +197,7 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske, @rmetzger\n" +
                 "* [x] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "    - Approved by @test\n" +
@@ -204,7 +208,8 @@ public class FlinkbotTest {
                 "* [x] 5. Overall code [quality] is good.\n" +
                 "    - Approved by @test\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
+                "questions about the review process or the usage of this bot";
 
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
@@ -214,12 +219,12 @@ public class FlinkbotTest {
 
         comments.add(getComment(TRACKING_MESSAGE, "flinkbot"));
 
-        comments.add(getComment("@flinkbot approve contribution", "fhueske"));
-        comments.add(getComment("@flinkbot approve contribution", "fhueske"));
-        comments.add(getComment("@flinkbot approve contribution", "fhueske"));
+        comments.add(getComment("@flinkbot approve description", "fhueske"));
+        comments.add(getComment("@flinkbot approve description", "fhueske"));
+        comments.add(getComment("@flinkbot approve description", "fhueske"));
         comments.add(getComment("@flinkbot approve consensus", "trohrmann"));
         comments.add(getComment("@flinkbot approve consensus", "trohrmann"));
-        comments.add(getComment("@flinkbot approve contribution", "rmetzger"));
+        comments.add(getComment("@flinkbot approve description", "rmetzger"));
         comments.add(getComment("@flinkbot disapprove consensus", "trohrmann"));
         comments.add(getComment("@flinkbot attention @uce @rmetzger @test\n\n", "trohrmann"));
         comments.add(getComment("@flinkbot attention @test @rmetzger", "test2"));
@@ -249,7 +254,7 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske, @rmetzger\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
@@ -257,14 +262,15 @@ public class FlinkbotTest {
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
+                "questions about the review process or the usage of this bot";
         final String EXPECTED = "Thanks a lot for your contribution to the Apache Flink project. I'm the @flinkbot. I help the community\n" +
                 "to review your pull request. We will use this comment to track the progress of the review.\n" +
                 "\n" +
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [contribution] is well-described.\n" +
+                "* [x] 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske, @hansi, @rmetzger\n" +
                 "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
@@ -272,7 +278,8 @@ public class FlinkbotTest {
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
+                "questions about the review process or the usage of this bot";
 
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
@@ -282,13 +289,13 @@ public class FlinkbotTest {
 
         comments.add(getComment("Some other text here.", "rmetzger"));
         comments.add(getComment(INITIAL, "flinkbot"));
-        comments.add(getComment("@flinkbot approve contribution", "fhueske"));
+        comments.add(getComment("@flinkbot approve description", "fhueske"));
         comments.add(getComment("@flinkbot approve consensus", "trohrmann"));
-        comments.add(getComment("@flinkbot approve contribution", "rmetzger"));
+        comments.add(getComment("@flinkbot approve description", "rmetzger"));
         comments.add(getComment("@flinkbot disapprove consensus", "trohrmann"));
         comments.add(getComment("@flinkbot attention @uce\n", "trohrmann"));
         comments.add(getComment("ASDjifejoi fjoif aweof pojaewf ijwef jiwg rjeg ijreg ", "rmetzger"));
-        comments.add(getComment("@flinkbot approve contribution", "hansi"));
+        comments.add(getComment("@flinkbot approve description", "hansi"));
 
 
         bot.processBotMentions(comments);
@@ -305,7 +312,7 @@ public class FlinkbotTest {
     @Test
     public void testProcessBotMentionsInvalidCommands() throws IOException {
         testCommand("@flinkbot aisdj ioajsd");
-        testCommand("@flinkbot aisdj contribution");
+        testCommand("@flinkbot aisdj description");
         testCommand("@flinkbot    ");
         testCommand("@flinkbot");
         testCommand("@flinkbot approve attention");
