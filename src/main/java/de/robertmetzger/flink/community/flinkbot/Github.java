@@ -80,6 +80,7 @@ public class Github {
         GHNotificationStream notifications = gitHub.listNotifications();
         // we are blocking
         notifications.nonBlocking(false);
+        notifications.since(0);
 
         notifications.read(false);
         notifications.participating(true);
