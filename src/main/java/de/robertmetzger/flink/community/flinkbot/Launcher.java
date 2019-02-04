@@ -1,11 +1,13 @@
 package de.robertmetzger.flink.community.flinkbot;
 
 import org.apache.commons.lang3.StringUtils;
+import org.kohsuke.github.GHThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,7 +41,6 @@ public class Launcher {
 
         // Schedule periodic checks
         int checkNewPRSeconds = Integer.valueOf(prop.getProperty("main.checkNewPRSeconds"));
-        int checkNewActionsSeconds = Integer.valueOf(prop.getProperty("main.checkNewActionsSeconds"));
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
@@ -51,17 +52,15 @@ public class Launcher {
             }
         }, 0, checkNewPRSeconds, TimeUnit.SECONDS);
 
-        executor.scheduleAtFixedRate(
-            () -> {
-                try {
-                    bot.checkForNewActions();
-                } catch (Throwable t) {
-                    LOG.warn("Error while checking for new actions", t);
-                }
-            },
-            checkNewPRSeconds / 2,
-            checkNewActionsSeconds,
-            TimeUnit.SECONDS);
+        Thread notificationProcessor = new Thread(() -> {
+            // process notifications indefinitely
+            LOG.info("Launching notifications processor");
+            Iterator<GHThread> notificationsIterator = gh.getNewNotificationsIterator();
+            bot.processBotMentions(notificationsIterator);
+            LOG.info("Shutting down notification processor ...");
+        });
+        notificationProcessor.setName("Notification processor");
+        notificationProcessor.start();
 
     }
 }

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 import org.junit.Test;
+import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
 import org.mockito.ArgumentCaptor;
 
@@ -54,7 +55,7 @@ public class FlinkbotTest {
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
-        bot.processBotMentions(comments);
+        bot.updatePullRequestThread(comments);
     }
 
     /**
@@ -70,7 +71,7 @@ public class FlinkbotTest {
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
 
-        bot.processBotMentions(comments);
+        bot.updatePullRequestThread(comments);
 
         // ensure comment.update() never got called
         verify(comments.get(0), never()).update(any());
@@ -115,7 +116,7 @@ public class FlinkbotTest {
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
         comments.add(createComment("@flinkbot approve description", "fhueske"));
 
-        bot.processBotMentions(comments);
+        bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         verify(comments.get(0)).update(argument.capture());
@@ -205,7 +206,7 @@ public class FlinkbotTest {
         comments.add(createComment("@flinkbot disapprove consensus", "trohrmann"));
 
 
-        bot.processBotMentions(comments);
+        bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         verify(comments.get(0)).update(argument.capture());
@@ -255,7 +256,7 @@ public class FlinkbotTest {
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
         comments.add(createComment("@flinkbot approve all", "fhueske"));
 
-        bot.processBotMentions(comments);
+        bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         verify(comments.get(0)).update(argument.capture());
@@ -325,7 +326,7 @@ public class FlinkbotTest {
         comments.add(createComment("@flinkbot approve quality", "test"));
 
 
-        bot.processBotMentions(comments);
+        bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         verify(comments.get(0)).update(argument.capture());
@@ -405,7 +406,7 @@ public class FlinkbotTest {
         comments.add(createComment("@flinkbot approve description", "hansi"));
 
 
-        bot.processBotMentions(comments);
+        bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         verify(comments.get(1)).update(argument.capture());
@@ -437,7 +438,7 @@ public class FlinkbotTest {
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
         comments.add(createComment(command, "fhueske"));
 
-        bot.processBotMentions(comments);
+        bot.updatePullRequestThread(comments);
 
         // ensure comment.update() never got called --> Because wrong commands should not update the tracking message
         verify(comments.get(0), never()).update(any());
@@ -447,6 +448,10 @@ public class FlinkbotTest {
         GHIssueComment comment = mock(GHIssueComment.class);
         when(comment.getBody()).thenReturn(body);
         when(comment.getUserName()).thenReturn(user);
+        GHIssue issue = mock(GHIssue.class);
+        when(issue.getNumber()).thenReturn(666);
+        when(issue.getTitle()).thenReturn("Mock title");
+        when(comment.getParent()).thenReturn(issue);
         return comment;
     }
 }

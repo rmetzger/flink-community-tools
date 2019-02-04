@@ -76,60 +76,14 @@ public class Github {
         }
     }
 
-    public List<NotificationAndComments> getNewNotifications() {
+    public Iterator<GHThread> getNewNotificationsIterator() {
         GHNotificationStream notifications = gitHub.listNotifications();
-        //  blocking mode = we are not listening for new notifications
-        notifications.nonBlocking(true);
+        // we are blocking
+        notifications.nonBlocking(false);
 
         notifications.read(false);
         notifications.participating(true);
-        Iterator<GHThread> iter = notifications.iterator();
-        List<NotificationAndComments> result = new ArrayList<>();
-
-        LOG.info("Getting notifications");
-        while(iter.hasNext()) {
-            GHThread ele = iter.next();
-            LOG.info("Found a notification with title '"+ele.getTitle()+"': " + ele);
-            if(ele.getReason().equals("mention")) {
-                try {
-                    List<GHIssueComment> comments = ele.getBoundPullRequest().getComments();
-                    // sort by date, so that we process mentions in order
-                    Collections.sort(comments, (o1, o2) -> {
-                        try {
-                            return o1.getCreatedAt().compareTo(o2.getCreatedAt());
-                        } catch (IOException e) {
-                            // Throw an exception here. IOExceptions should not happen (It's a mistake by the library)
-                            LOG.warn("Error while sorting", e);
-                            throw new RuntimeException("Error while sorting", e);
-                        }
-                    });
-                    result.add(new NotificationAndComments(ele, comments));
-                } catch (IOException e) {
-                    LOG.warn("Error while getting comments", e);
-                }
-            }
-        }
-
-        LOG.info("Done checking notifications. Requests remaining: " + getRemainingRequests());
-        return result;
+        return notifications.iterator();
     }
 
-
-    public static class NotificationAndComments {
-        private GHThread notification;
-        private List<GHIssueComment> comments;
-
-        public NotificationAndComments(GHThread notification, List<GHIssueComment> comments) {
-            this.notification = notification;
-            this.comments = comments;
-        }
-
-        public GHThread getNotification() {
-            return notification;
-        }
-
-        public List<GHIssueComment> getComments() {
-            return comments;
-        }
-    }
 }

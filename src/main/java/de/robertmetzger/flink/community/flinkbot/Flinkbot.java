@@ -4,6 +4,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
+import org.kohsuke.github.GHThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,42 +104,49 @@ public class Flinkbot {
     }
 
     /**
-     * The method is synchronized, to avoid multiple threads concurrently processing new notifications.
+     * This is processing all incoming mentions
+     *
+     * @param notifications new incoming notifications
      */
-    public synchronized void checkForNewActions() {
-        // get notifications
-        List<Github.NotificationAndComments> notifications = gh.getNewNotifications();
-        for(Github.NotificationAndComments notification: notifications) {
-            int numComments = 0;
-            try {
-                numComments = notification.getComments().size();
-            } catch(Throwable e) {
-                LOG.debug("Error getting comment count", e);
-            }
-            LOG.debug("Processing notification '" + notification.getNotification().getTitle() + "' and " + numComments + " comments");
+    public void processBotMentions(Iterator<GHThread> notifications) {
+        while (notifications.hasNext()) {
+            GHThread thread = notifications.next();
+            LOG.info("Found a notification with title '" + thread.getTitle() + "': " + thread);
+            if (thread.getReason().equals("mention")) {
+                try {
+                    // we immediately mark the notification as read to avoid concurrency issues with newer comments
+                    // being posted while still processing the old ones.
+                    thread.markAsRead();
+                    Thread.sleep(1000); // + sleep some time to ensure we get new comments with this fetch
 
-            processBotMentions(notification.getComments());
-
-            try {
-                LOG.debug("Marking notification as read");
-                notification.getNotification().markAsRead();
-            } catch (IOException e) {
-                LOG.warn("Error marking notification as read", e);
+                    List<GHIssueComment> comments = thread.getBoundPullRequest().getComments();
+                    // sort by date, so that we process mentions in order
+                    Collections.sort(comments, (o1, o2) -> {
+                        try {
+                            return o1.getCreatedAt().compareTo(o2.getCreatedAt());
+                        } catch (IOException e) {
+                            // Throw an exception here. IOExceptions should not happen (It's a mistake by the library)
+                            LOG.warn("Error while sorting", e);
+                            throw new RuntimeException("Error while sorting", e);
+                        }
+                    });
+                    //
+                    updatePullRequestThread(comments);
+                } catch (Throwable e) {
+                    LOG.warn("Error while processing notification", e);
+                }
             }
+            LOG.info("Done processing notification. Requests remaining: " + gh.getRemainingRequests());
         }
     }
 
-    /**
-     * This method reads all comments of a PR, locates the comment that is maintained by the bot,
-     * and all mentions
-     *
-     * @param comments all comments of a PR
-     */
-    /*private*/ void processBotMentions(List<GHIssueComment> comments) {
+
+    /*private */ void updatePullRequestThread(List<GHIssueComment> comments) {
         if(comments == null) {
             LOG.warn("Notification without comments");
             return;
         }
+        LOG.debug("Processing pull request thread with " + comments.size() + " comments");
         GHIssueComment trackingComment = null;
         Map<String, Set<String>> approvals = new HashMap<>();
         Set<String> attention = new HashSet<>();
@@ -263,8 +271,8 @@ public class Flinkbot {
                 newComment.deleteCharAt(newComment.length()-1); // remove trailing newline
                 String newCommentString = newComment.toString();
                 if(!newCommentString.equals(trackingComment.getBody())) {
-                    LOG.debug("new '{}' old '{}'", newCommentString.length(), trackingComment.getBody().length());
-                    LOG.debug("new '{}' old '{}'", newCommentString, trackingComment.getBody());
+                    // LOG.debug("new '{}' old '{}'", newCommentString.length(), trackingComment.getBody().length());
+                    // LOG.debug("new '{}' old '{}'", newCommentString, trackingComment.getBody());
 
                     // need to update
                     trackingComment.update(newCommentString);
