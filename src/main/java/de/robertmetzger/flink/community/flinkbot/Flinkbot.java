@@ -22,11 +22,11 @@ public class Flinkbot {
             "\n" +
             "## Review Progress\n" +
             "\n" +
-            "* [ ] 1. The [description] looks good.\n" +
-            "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
-            "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-            "* [ ] 4. The [architecture] is sound.\n" +
-            "* [ ] 5. Overall code [quality] is good.\n" +
+            "* ❌ 1. The [description] looks good.\n" +
+            "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+            "* ❌ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+            "* ❌ 4. The [architecture] is sound.\n" +
+            "* ❌ 5. Overall code [quality] is good.\n" +
             "\n" +
             "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
             "of the review process." +
@@ -232,7 +232,7 @@ public class Flinkbot {
                 }
                 // copy the original line
                 if(tick) {
-                    newComment.append(line.replace("[ ]", "[x]"));
+                    newComment.append(line.replace("❌", "✅"));
                 } else {
                     newComment.append(line);
                 }

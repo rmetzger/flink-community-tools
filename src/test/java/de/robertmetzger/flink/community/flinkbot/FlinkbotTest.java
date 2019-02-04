@@ -22,11 +22,11 @@ public class FlinkbotTest {
             "\n" +
             "## Review Progress\n" +
             "\n" +
-            "* [ ] 1. The [description] looks good.\n" +
-            "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
-            "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-            "* [ ] 4. The [architecture] is sound.\n" +
-            "* [ ] 5. Overall code [quality] is good.\n" +
+            "* ❌ 1. The [description] looks good.\n" +
+            "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+            "* ❌ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+            "* ❌ 4. The [architecture] is sound.\n" +
+            "* ❌ 5. Overall code [quality] is good.\n" +
             "\n" +
             "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
             "of the review process." +
@@ -87,12 +87,12 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [description] looks good.\n" +
+                "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC]\n" +
-                "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-                "* [ ] 4. The [architecture] is sound.\n" +
-                "* [ ] 5. Overall code [quality] is good.\n" +
+                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ❌ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❌ 4. The [architecture] is sound.\n" +
+                "* ❌ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
                 "of the review process." +
@@ -133,14 +133,14 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [description] looks good.\n" +
+                "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske\n" +
-                "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "    - Approved by @fhueske\n" +
-                "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-                "* [ ] 4. The [architecture] is sound.\n" +
+                "* ❌ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❌ 4. The [architecture] is sound.\n" +
                 "    - Approved by @fhueske\n" +
-                "* [ ] 5. Overall code [quality] is good.\n" +
+                "* ❌ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
                 "questions about the review process or the usage of this bot";
@@ -173,13 +173,13 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [description] looks good.\n" +
+                "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC], @trohrmann [committer]\n" +
-                "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ✅ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "    - Needs attention by @uce [committer]\n" +
-                "* [ ] 4. The [architecture] is sound.\n" +
-                "* [ ] 5. Overall code [quality] is good.\n" +
+                "* ❌ 4. The [architecture] is sound.\n" +
+                "* ❌ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
                 "of the review process." +
@@ -224,14 +224,14 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [description] looks good.\n" +
+                "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC]\n" +
-                "* [x] 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ✅ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "    - Approved by @fhueske [PMC]\n" +
-                "* [ ] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-                "* [x] 4. The [architecture] is sound.\n" +
+                "* ❌ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ✅ 4. The [architecture] is sound.\n" +
                 "    - Approved by @fhueske [PMC]\n" +
-                "* [x] 5. Overall code [quality] is good.\n" +
+                "* ✅ 5. Overall code [quality] is good.\n" +
                 "    - Approved by @fhueske [PMC]\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
@@ -277,15 +277,15 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [description] looks good.\n" +
+                "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC], @rmetzger [PMC]\n" +
-                "* [x] 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ✅ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "    - Approved by @test\n" +
-                "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ✅ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "    - Needs attention by @rmetzger [PMC], @test, @test2, @uce [committer]\n" +
-                "* [x] 4. The [architecture] is sound.\n" +
+                "* ✅ 4. The [architecture] is sound.\n" +
                 "    - Approved by @test\n" +
-                "* [x] 5. Overall code [quality] is good.\n" +
+                "* ✅ 5. Overall code [quality] is good.\n" +
                 "    - Approved by @test\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
@@ -343,13 +343,13 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [description] looks good.\n" +
+                "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC], @rmetzger [PMC]\n" +
-                "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ✅ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "    - Needs attention by @uce [committer]\n" +
-                "* [ ] 4. The [architecture] is sound.\n" +
-                "* [ ] 5. Overall code [quality] is good.\n" +
+                "* ❌ 4. The [architecture] is sound.\n" +
+                "* ❌ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
                 "of the review process." +
@@ -368,13 +368,13 @@ public class FlinkbotTest {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* [x] 1. The [description] looks good.\n" +
+                "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC], @hansi, @rmetzger [PMC]\n" +
-                "* [ ] 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* [x] 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ✅ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
                 "    - Needs attention by @uce [committer]\n" +
-                "* [ ] 4. The [architecture] is sound.\n" +
-                "* [ ] 5. Overall code [quality] is good.\n" +
+                "* ❌ 4. The [architecture] is sound.\n" +
+                "* ❌ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
                 "of the review process." +
