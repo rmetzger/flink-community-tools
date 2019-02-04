@@ -24,7 +24,7 @@ public class FlinkbotTest {
             "\n" +
             "* ❌ 1. The [description] looks good.\n" +
             "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
-            "* ❌ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+            "* ❔ 3. Needs [attention] from.\n" +
             "* ❌ 4. The [architecture] is sound.\n" +
             "* ❌ 5. Overall code [quality] is good.\n" +
             "\n" +
@@ -90,7 +90,7 @@ public class FlinkbotTest {
                 "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC]\n" +
                 "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* ❌ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❔ 3. Needs [attention] from.\n" +
                 "* ❌ 4. The [architecture] is sound.\n" +
                 "* ❌ 5. Overall code [quality] is good.\n" +
                 "\n" +
@@ -176,7 +176,7 @@ public class FlinkbotTest {
                 "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC], @trohrmann [committer]\n" +
                 "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* ✅ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❗ 3. Needs [attention] from.\n" +
                 "    - Needs attention by @uce [committer]\n" +
                 "* ❌ 4. The [architecture] is sound.\n" +
                 "* ❌ 5. Overall code [quality] is good.\n" +
@@ -228,7 +228,7 @@ public class FlinkbotTest {
                 "    - Approved by @fhueske [PMC]\n" +
                 "* ✅ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "    - Approved by @fhueske [PMC]\n" +
-                "* ❌ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❔ 3. Needs [attention] from.\n" +
                 "* ✅ 4. The [architecture] is sound.\n" +
                 "    - Approved by @fhueske [PMC]\n" +
                 "* ✅ 5. Overall code [quality] is good.\n" +
@@ -281,7 +281,7 @@ public class FlinkbotTest {
                 "    - Approved by @fhueske [PMC], @rmetzger [PMC]\n" +
                 "* ✅ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "    - Approved by @test\n" +
-                "* ✅ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❗ 3. Needs [attention] from.\n" +
                 "    - Needs attention by @rmetzger [PMC], @test, @test2, @uce [committer]\n" +
                 "* ✅ 4. The [architecture] is sound.\n" +
                 "    - Approved by @test\n" +
@@ -346,7 +346,7 @@ public class FlinkbotTest {
                 "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC], @rmetzger [PMC]\n" +
                 "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* ✅ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❗ 3. Needs [attention] from.\n" +
                 "    - Needs attention by @uce [committer]\n" +
                 "* ❌ 4. The [architecture] is sound.\n" +
                 "* ❌ 5. Overall code [quality] is good.\n" +
@@ -371,7 +371,7 @@ public class FlinkbotTest {
                 "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC], @hansi, @rmetzger [PMC]\n" +
                 "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* ✅ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❗ 3. Needs [attention] from.\n" +
                 "    - Needs attention by @uce [committer]\n" +
                 "* ❌ 4. The [architecture] is sound.\n" +
                 "* ❌ 5. Overall code [quality] is good.\n" +

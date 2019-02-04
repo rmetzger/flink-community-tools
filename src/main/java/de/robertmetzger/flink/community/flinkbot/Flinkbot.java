@@ -24,7 +24,7 @@ public class Flinkbot {
             "\n" +
             "* ❌ 1. The [description] looks good.\n" +
             "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
-            "* ❌ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+            "* ❔ 3. Needs [attention] from.\n" +
             "* ❌ 4. The [architecture] is sound.\n" +
             "* ❌ 5. Overall code [quality] is good.\n" +
             "\n" +
@@ -206,6 +206,7 @@ public class Flinkbot {
 
                 // decide whether we add something
                 boolean tick = false;
+                boolean attentionTick = false;
                 String nextLine = null;
                 for(String approval: VALID_APPROVALS) {
                     if(line.contains("[" + approval + "]")) {
@@ -228,11 +229,16 @@ public class Flinkbot {
                         append += StringUtils.join(addCommunityStatus(attSorted), ", ");
                         nextLine = append;
                         tick = true;
+                        attentionTick = true;
                     }
                 }
                 // copy the original line
                 if(tick) {
-                    newComment.append(line.replace("❌", "✅"));
+                    if (attentionTick) {
+                        newComment.append(line.replace("❔", "❗"));
+                    } else {
+                        newComment.append(line.replace("❌", "✅"));
+                    }
                 } else {
                     newComment.append(line);
                 }
