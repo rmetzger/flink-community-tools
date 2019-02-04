@@ -89,7 +89,7 @@ public class Github {
         LOG.info("Getting notifications");
         while(iter.hasNext()) {
             GHThread ele = iter.next();
-            LOG.debug("Found a notification " + ele);
+            LOG.info("Found a notification with title '"+ele.getTitle()+"': " + ele);
             if(ele.getReason().equals("mention")) {
                 try {
                     List<GHIssueComment> comments = ele.getBoundPullRequest().getComments();

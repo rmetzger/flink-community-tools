@@ -18,7 +18,7 @@ public class Launcher {
     private static Logger LOG = LoggerFactory.getLogger(Launcher.class);
 
     public static void main(String[] args) {
-        LOG.info("Launching @flinkbot");
+        LOG.info("Launching The Flink Bot");
 
         Properties prop = new Properties();
         try {

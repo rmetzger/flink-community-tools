@@ -15,30 +15,8 @@ import java.util.stream.Collectors;
 public class Flinkbot {
     private static Logger LOG = LoggerFactory.getLogger(Flinkbot.class);
 
-    private static final String BOT_NAME = "@flinkbot";
-    private static final String TRACKING_MESSAGE = "Thanks a lot for your contribution to the Apache Flink project. I'm the "+BOT_NAME+". I help the community\n" +
-            "to review your pull request. We will use this comment to track the progress of the review.\n" +
-            "\n" +
-            "\n" +
-            "## Review Progress\n" +
-            "\n" +
-            "* ❌ 1. The [description] looks good.\n" +
-            "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
-            "* ❔ 3. Needs [attention] from.\n" +
-            "* ❌ 4. The [architecture] is sound.\n" +
-            "* ❌ 5. Overall code [quality] is good.\n" +
-            "\n" +
-            "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
-            "of the review process." +
-            "<details>\n" +
-            "  <summary>Bot commands</summary>\n" +
-            "  The "+BOT_NAME+" bot supports the following commands:\n" +
-            "\n" +
-            " - `"+BOT_NAME+" approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
-            " - `"+BOT_NAME+" approve all` to approve all aspects\n" +
-            " - `"+BOT_NAME+" attention @username1 [@username2 ..]` to require somebody's attention\n" +
-            " - `"+BOT_NAME+" disapprove architecture` to remove an approval\n" +
-            "</details>";
+    private final String botName;
+    private final String trackingMessage;
 
     private static final String[] VALID_APPROVALS = {"description", "consensus", "architecture", "quality"};
 
@@ -49,9 +27,31 @@ public class Flinkbot {
 
     public Flinkbot(Github gh, String[] committers, String[] pmc) {
         this.gh = gh;
-        if(!("@"+gh.getBotName()).equals(BOT_NAME)) {
-            throw new RuntimeException("Wrong hardcoded bot name");
-        }
+        this.botName = "@"+gh.getBotName();
+        this.trackingMessage = "Thanks a lot for your contribution to the Apache Flink project. I'm the "+ botName +". I help the community\n" +
+                "to review your pull request. We will use this comment to track the progress of the review.\n" +
+                "\n" +
+                "\n" +
+                "## Review Progress\n" +
+                "\n" +
+                "* ❌ 1. The [description] looks good.\n" +
+                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ❔ 3. Needs [attention] from.\n" +
+                "* ❌ 4. The [architecture] is sound.\n" +
+                "* ❌ 5. Overall code [quality] is good.\n" +
+                "\n" +
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
+                "of the review process." +
+                "<details>\n" +
+                "  <summary>Bot commands</summary>\n" +
+                "  The "+ botName +" bot supports the following commands:\n" +
+                "\n" +
+                " - `"+ botName +" approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+                " - `"+ botName +" approve all` to approve all aspects\n" +
+                " - `"+ botName +" attention @username1 [@username2 ..]` to require somebody's attention\n" +
+                " - `"+ botName +" disapprove architecture` to remove an approval\n" +
+                "</details>";
+
         this.committers = committers;
         this.pmc = pmc;
     }
@@ -74,7 +74,7 @@ public class Flinkbot {
         for (GHIssue pr : prs) {
             LOG.info("Commenting with tracking message on PR " + pullToSimpleString(pr));
             try {
-                pr.comment(TRACKING_MESSAGE);
+                pr.comment(trackingMessage);
             } catch (IOException e) {
                 LOG.warn("Error writing tracking message", e);
             }
@@ -99,7 +99,7 @@ public class Flinkbot {
     }
 
     private boolean isTrackingMessage(String body) {
-        return body.substring(0, Math.min(body.length(), 10)).equals(TRACKING_MESSAGE.substring(0, 10));
+        return body.substring(0, Math.min(body.length(), 10)).equals(trackingMessage.substring(0, 10));
     }
 
     /**
@@ -109,8 +109,18 @@ public class Flinkbot {
         // get notifications
         List<Github.NotificationAndComments> notifications = gh.getNewNotifications();
         for(Github.NotificationAndComments notification: notifications) {
-            processBotMentions(notification.getComments());
+            int numComments = 0;
             try {
+                numComments = notification.getComments().size();
+            } catch(Throwable e) {
+                LOG.debug("Error getting comment count", e);
+            }
+            LOG.debug("Processing notification '" + notification.getNotification().getTitle() + "' and " + numComments + " comments");
+
+            processBotMentions(notification.getComments());
+
+            try {
+                LOG.debug("Marking notification as read");
                 notification.getNotification().markAsRead();
             } catch (IOException e) {
                 LOG.warn("Error marking notification as read", e);
@@ -126,6 +136,7 @@ public class Flinkbot {
      */
     /*private*/ void processBotMentions(List<GHIssueComment> comments) {
         if(comments == null) {
+            LOG.warn("Notification without comments");
             return;
         }
         GHIssueComment trackingComment = null;
@@ -139,10 +150,10 @@ public class Flinkbot {
             try {
                 String[] commentLines = comment.getBody().split("\n");
                 for(String line: commentLines) {
-                    if(line.contains(BOT_NAME)) {
+                    if(line.contains(botName)) {
                         String[] tokens = line.split(" ");
                         for(int i = 0; i < tokens.length; i++) {
-                            if(tokens[i].equals(BOT_NAME)) {
+                            if(tokens[i].equals(botName)) {
                                 if(i+2 >= tokens.length) {
                                     LOG.debug("Incomplete command in: " + line);
                                     break; // stop processing this line
@@ -197,13 +208,12 @@ public class Flinkbot {
 
         // update tracking comment
         if(trackingComment == null) {
-            LOG.info("Invalid notification? comments do not contain tracking message " + comments);
+            LOG.warn("Invalid notification? comments do not contain tracking message " + comments);
         } else {
             // generate comment
             StringBuffer newComment = new StringBuffer();
-            String[] messageLines = TRACKING_MESSAGE.split("\n");
+            String[] messageLines = trackingMessage.split("\n");
             for(String line: messageLines) {
-
                 // decide whether we add something
                 boolean tick = false;
                 boolean attentionTick = false;
@@ -253,8 +263,12 @@ public class Flinkbot {
                 newComment.deleteCharAt(newComment.length()-1); // remove trailing newline
                 String newCommentString = newComment.toString();
                 if(!newCommentString.equals(trackingComment.getBody())) {
+                    LOG.debug("new '{}' old '{}'", newCommentString.length(), trackingComment.getBody().length());
+                    LOG.debug("new '{}' old '{}'", newCommentString, trackingComment.getBody());
+
                     // need to update
                     trackingComment.update(newCommentString);
+                    LOG.info("Updating tracking comment on PR: " + pullToSimpleString(trackingComment.getParent()));
                 }
             } catch (IOException e) {
                 LOG.warn("Error updating tracking comment", e);
