@@ -28,8 +28,17 @@ public class Flinkbot {
             "* [ ] 4. The [architecture] is sound.\n" +
             "* [ ] 5. Overall code [quality] is good.\n" +
             "\n" +
-            "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
-            "questions about the review process or the usage of this bot";
+            "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
+            "of the review process." +
+            "<details>\n" +
+            "  <summary>Bot commands</summary>\n" +
+            "  The "+BOT_NAME+" bot supports the following commands:\n" +
+            "\n" +
+            " - `"+BOT_NAME+" approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+            " - `"+BOT_NAME+" approve all` to approve all aspects\n" +
+            " - `"+BOT_NAME+" attention @username1 [@username2 ..]` to require somebody's attention\n" +
+            " - `"+BOT_NAME+" disapprove architecture` to remove an approval\n" +
+            "</details>";
 
     private static final String[] VALID_APPROVALS = {"description", "consensus", "architecture", "quality"};
 
@@ -211,7 +220,7 @@ public class Flinkbot {
                        }
                     }
                 }
-                if(line.contains("attention")) {
+                if(line.contains("[attention]")) {
                     String append = "    - Needs attention by ";
                     if(attention.size() > 0) {
                         List<String> attSorted = new ArrayList<>(attention);

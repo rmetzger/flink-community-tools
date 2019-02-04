@@ -28,8 +28,17 @@ public class FlinkbotTest {
             "* [ ] 4. The [architecture] is sound.\n" +
             "* [ ] 5. Overall code [quality] is good.\n" +
             "\n" +
-            "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
-            "questions about the review process or the usage of this bot";
+            "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
+            "of the review process." +
+            "<details>\n" +
+            "  <summary>Bot commands</summary>\n" +
+            "  The @flinkbot bot supports the following commands:\n" +
+            "\n" +
+            " - `@flinkbot approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+            " - `@flinkbot approve all` to approve all aspects\n" +
+            " - `@flinkbot attention @username1 [@username2 ..]` to require somebody's attention\n" +
+            " - `@flinkbot disapprove architecture` to remove an approval\n" +
+            "</details>";
 
     private static String[] pmc = {"fhueske", "rmetzger"};
     // this is obviously wrong information, for the same of testing only. sorry :(
@@ -85,8 +94,17 @@ public class FlinkbotTest {
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
-                "questions about the review process or the usage of this bot";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
+                "of the review process." +
+                "<details>\n" +
+                "  <summary>Bot commands</summary>\n" +
+                "  The @flinkbot bot supports the following commands:\n" +
+                "\n" +
+                " - `@flinkbot approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+                " - `@flinkbot approve all` to approve all aspects\n" +
+                " - `@flinkbot attention @username1 [@username2 ..]` to require somebody's attention\n" +
+                " - `@flinkbot disapprove architecture` to remove an approval\n" +
+                "</details>";
 
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
@@ -163,8 +181,17 @@ public class FlinkbotTest {
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
-                "questions about the review process or the usage of this bot";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
+                "of the review process." +
+                "<details>\n" +
+                "  <summary>Bot commands</summary>\n" +
+                "  The @flinkbot bot supports the following commands:\n" +
+                "\n" +
+                " - `@flinkbot approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+                " - `@flinkbot approve all` to approve all aspects\n" +
+                " - `@flinkbot attention @username1 [@username2 ..]` to require somebody's attention\n" +
+                " - `@flinkbot disapprove architecture` to remove an approval\n" +
+                "</details>";
 
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
@@ -207,8 +234,17 @@ public class FlinkbotTest {
                 "* [x] 5. Overall code [quality] is good.\n" +
                 "    - Approved by @fhueske [PMC]\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
-                "questions about the review process or the usage of this bot";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
+                "of the review process." +
+                "<details>\n" +
+                "  <summary>Bot commands</summary>\n" +
+                "  The @flinkbot bot supports the following commands:\n" +
+                "\n" +
+                " - `@flinkbot approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+                " - `@flinkbot approve all` to approve all aspects\n" +
+                " - `@flinkbot attention @username1 [@username2 ..]` to require somebody's attention\n" +
+                " - `@flinkbot disapprove architecture` to remove an approval\n" +
+                "</details>";
 
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
@@ -252,8 +288,17 @@ public class FlinkbotTest {
                 "* [x] 5. Overall code [quality] is good.\n" +
                 "    - Approved by @test\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
-                "questions about the review process or the usage of this bot";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
+                "of the review process." +
+                "<details>\n" +
+                "  <summary>Bot commands</summary>\n" +
+                "  The @flinkbot bot supports the following commands:\n" +
+                "\n" +
+                " - `@flinkbot approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+                " - `@flinkbot approve all` to approve all aspects\n" +
+                " - `@flinkbot attention @username1 [@username2 ..]` to require somebody's attention\n" +
+                " - `@flinkbot disapprove architecture` to remove an approval\n" +
+                "</details>";
 
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
@@ -306,8 +351,17 @@ public class FlinkbotTest {
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
-                "questions about the review process or the usage of this bot";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
+                "of the review process." +
+                "<details>\n" +
+                "  <summary>Bot commands</summary>\n" +
+                "  The @flinkbot bot supports the following commands:\n" +
+                "\n" +
+                " - `@flinkbot approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+                " - `@flinkbot approve all` to approve all aspects\n" +
+                " - `@flinkbot attention @username1 [@username2 ..]` to require somebody's attention\n" +
+                " - `@flinkbot disapprove architecture` to remove an approval\n" +
+                "</details>";
         final String EXPECTED = "Thanks a lot for your contribution to the Apache Flink project. I'm the @flinkbot. I help the community\n" +
                 "to review your pull request. We will use this comment to track the progress of the review.\n" +
                 "\n" +
@@ -322,8 +376,17 @@ public class FlinkbotTest {
                 "* [ ] 4. The [architecture] is sound.\n" +
                 "* [ ] 5. Overall code [quality] is good.\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
-                "questions about the review process or the usage of this bot";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
+                "of the review process." +
+                "<details>\n" +
+                "  <summary>Bot commands</summary>\n" +
+                "  The @flinkbot bot supports the following commands:\n" +
+                "\n" +
+                " - `@flinkbot approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+                " - `@flinkbot approve all` to approve all aspects\n" +
+                " - `@flinkbot attention @username1 [@username2 ..]` to require somebody's attention\n" +
+                " - `@flinkbot disapprove architecture` to remove an approval\n" +
+                "</details>";
 
         Github gh = mock(Github.class);
         when(gh.getBotName()).thenReturn("flinkbot");
