@@ -38,7 +38,7 @@ public class Flinkbot {
                 "* ❌ 1. The [description] looks good.\n" +
                 "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* ❔ 3. Needs [attention] from.\n" +
-                "* ❌ 4. The [architecture] is sound.\n" +
+                "* ❌ 4. The change fits into the overall [architecture].\n" +
                 "* ❌ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
