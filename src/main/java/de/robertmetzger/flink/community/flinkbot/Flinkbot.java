@@ -67,7 +67,7 @@ public class Flinkbot {
         List<GHIssue> prs = gh.getAllPullRequests();
         // remove all PRs we've commented on already
         prs.removeIf(pr -> {
-            LOG.debug("Checking PR " + pullToSimpleString(pr));
+            // LOG.debug("Checking PR " + pullToSimpleString(pr));
             return pullRequestHasComment(pr);
         });
 

@@ -16,7 +16,9 @@ import java.util.*;
 public class Github {
     private static Logger LOG = LoggerFactory.getLogger(Github.class);
 
-    private final GitHub gitHub;
+    private final GitHub cachedGitHub;
+
+    private final GitHub directGitHub;
 
     private final String repository;
     /**
@@ -33,15 +35,20 @@ public class Github {
 
 
         try {
-          //  Cache cache = new Cache(new File(cacheDir), cacheMB * 1024 * 1024);
+            Cache cache = new Cache(new File(cacheDir), cacheMB * 1024 * 1024);
             OkHttpClient.Builder okHttpClient = new OkHttpClient.Builder();
-          //  okHttpClient.cache(cache);
-            gitHub = GitHubBuilder.fromEnvironment().withPassword(botName, prop.getProperty("gh.token"))
+            okHttpClient.cache(cache);
+            cachedGitHub = GitHubBuilder.fromEnvironment().withPassword(botName, prop.getProperty("gh.token"))
                     .withConnector(new OkHttp3Connector(new OkUrlFactory(okHttpClient.build())))
                     .build();
-            if(!gitHub.isCredentialValid()) {
+            if(!cachedGitHub.isCredentialValid()) {
                 throw new RuntimeException("Invalid credentials");
             }
+
+            // also establish an uncached connection with GitHub for notifications processing
+            directGitHub = GitHubBuilder.fromEnvironment().withPassword(botName, prop.getProperty("gh.token"))
+                    .withConnector(new OkHttp3Connector(new OkUrlFactory(new OkHttpClient.Builder().build())))
+                    .build();
 
         } catch (IOException e) {
             throw new RuntimeException("Error initializing GitHub", e);
@@ -55,7 +62,7 @@ public class Github {
      */
     public List<GHIssue> getAllPullRequests() {
         try {
-            GHRepository repo = gitHub.getRepository(repository);
+            GHRepository repo = cachedGitHub.getRepository(repository);
             List<GHIssue> allIssues = repo.getIssues(GHIssueState.OPEN);
             // remove issues, keep PRs
             allIssues.removeIf(issue -> !issue.isPullRequest());
@@ -73,7 +80,7 @@ public class Github {
 
     public int getRemainingRequests() {
         try {
-            return gitHub.getRateLimit().remaining;
+            return cachedGitHub.getRateLimit().remaining;
         } catch (IOException e) {
             LOG.info("Unable to get current rate limit", e);
             return -1;
@@ -81,7 +88,7 @@ public class Github {
     }
 
     public Iterator<GHThread> getNewNotificationsIterator() {
-        GHNotificationStream notifications = gitHub.listNotifications();
+        GHNotificationStream notifications = directGitHub.listNotifications();
         // we are blocking
         notifications.nonBlocking(false);
         notifications.since(0);

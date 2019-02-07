@@ -3,9 +3,6 @@ package de.robertmetzger.flink.community.flinkbot;
 
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.GHThread;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
-import org.kohsuke.github.extras.OkHttpConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
