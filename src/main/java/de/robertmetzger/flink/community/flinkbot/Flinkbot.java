@@ -112,8 +112,12 @@ public class Flinkbot {
         while (notifications.hasNext()) {
             GHThread thread = notifications.next();
             LOG.info("Found a notification with title '" + thread.getTitle() + "': " + thread);
-            if (thread.getReason().equals("mention")) {
-                try {
+            try {
+                if(thread.isRead()) {
+                    LOG.debug("Skipping read notification with title "+thread.getTitle());
+                    continue;
+                }
+                if (thread.getReason().equals("mention")) {
                     // we immediately mark the notification as read to avoid concurrency issues with newer comments
                     // being posted while still processing the old ones.
                     thread.markAsRead();
@@ -132,9 +136,13 @@ public class Flinkbot {
                     });
                     //
                     updatePullRequestThread(comments);
-                } catch (Throwable e) {
-                    LOG.warn("Error while processing notification", e);
+                } else {
+                    // we will not do anything with this notification.
+                    LOG.debug("Marking notification with reason '{}' and title '{}' as read", thread.getReason(), thread.getTitle());
+                    thread.markAsRead();
                 }
+            } catch (Throwable e) {
+                LOG.warn("Error while processing notification", e);
             }
             LOG.info("Done processing notification. Requests remaining: " + gh.getRemainingRequests());
         }

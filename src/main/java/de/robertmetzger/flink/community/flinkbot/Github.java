@@ -1,11 +1,11 @@
 package de.robertmetzger.flink.community.flinkbot;
 
 
-import com.squareup.okhttp.Cache;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.OkUrlFactory;
+import okhttp3.Cache;
+import okhttp3.OkHttpClient;
+import okhttp3.OkUrlFactory;
 import org.kohsuke.github.*;
-import org.kohsuke.github.extras.OkHttpConnector;
+import org.kohsuke.github.extras.OkHttp3Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,14 +31,18 @@ public class Github {
         String cacheDir = prop.getProperty("main.cacheDir");
         botName = prop.getProperty("gh.user");
 
-        Cache cache = new Cache(new File(cacheDir), cacheMB * 1024 * 1024); // 10MB cache
+
         try {
+          //  Cache cache = new Cache(new File(cacheDir), cacheMB * 1024 * 1024);
+            OkHttpClient.Builder okHttpClient = new OkHttpClient.Builder();
+          //  okHttpClient.cache(cache);
             gitHub = GitHubBuilder.fromEnvironment().withPassword(botName, prop.getProperty("gh.token"))
-                    .withConnector(new OkHttpConnector(new OkUrlFactory(new OkHttpClient().setCache(cache))))
+                    .withConnector(new OkHttp3Connector(new OkUrlFactory(okHttpClient.build())))
                     .build();
             if(!gitHub.isCredentialValid()) {
                 throw new RuntimeException("Invalid credentials");
             }
+
         } catch (IOException e) {
             throw new RuntimeException("Error initializing GitHub", e);
         }
@@ -83,7 +87,7 @@ public class Github {
         notifications.since(0);
 
         notifications.read(false);
-        notifications.participating(true);
+        notifications.participating(false);
         return notifications.iterator();
     }
 

@@ -1,9 +1,14 @@
 package de.robertmetzger.flink.community.flinkbot;
 
+
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.GHThread;
+import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.extras.OkHttpConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +26,13 @@ public class Launcher {
 
     public static void main(String[] args) {
         LOG.info("Launching The Flink Bot");
+
+        // Optionally remove existing handlers attached to j.u.l root logger
+        SLF4JBridgeHandler.removeHandlersForRootLogger();  // (since SLF4J 1.6.5)
+
+        // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
+        // the initialization phase of your application
+        SLF4JBridgeHandler.install();
 
         Properties prop = new Properties();
         try {
