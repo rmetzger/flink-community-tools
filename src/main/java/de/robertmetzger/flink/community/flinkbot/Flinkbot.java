@@ -179,6 +179,8 @@ public class Flinkbot {
                 String[] commentLines = comment.getBody().split("\n");
                 for(String line: commentLines) {
                     if(line.contains(botName)) {
+                        // remove , or . in the line.
+                        line = line.replaceAll("[,|.]", "");
                         String[] tokens = line.split(" ");
                         for(int i = 0; i < tokens.length; i++) {
                             if(tokens[i].equals(botName)) {

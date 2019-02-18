@@ -55,7 +55,7 @@ Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-pr
 * [ ] Execute jebsen tests
 * [ ] Dynamically query list of contributors from GH
 * [ ] Flinkbot does not process mentions in reviews https://github.com/apache/flink/pull/7670#pullrequestreview-202025315
-* [ ] Error with . https://github.com/apache/flink/pull/7725 
+* [x] Error with . https://github.com/apache/flink/pull/7725 
 
 
 ## Future projects

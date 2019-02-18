@@ -7,11 +7,18 @@ import static org.mockito.Mockito.*;
 import org.junit.Test;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
+import org.kohsuke.github.GHLabel;
+import org.kohsuke.github.GHRepository;
 import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Unit test for FlinkbotTest.
@@ -49,9 +56,8 @@ public class FlinkbotTest {
      * Emtpy comment list
      */
     @Test
-    public void testProcessBotMentionsEmpty() {
-        Github gh = mock(Github.class);
-        when(gh.getBotName()).thenReturn("flinkbot");
+    public void testProcessBotMentionsEmpty() throws IOException {
+        Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
@@ -63,8 +69,7 @@ public class FlinkbotTest {
      */
     @Test
     public void testProcessBotMentionsNoChanges() throws IOException {
-        Github gh = mock(Github.class);
-        when(gh.getBotName()).thenReturn("flinkbot");
+        Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
@@ -109,8 +114,7 @@ public class FlinkbotTest {
                 " - `@flinkbot disapprove architecture` to remove an approval\n" +
                 "</details>";
 
-        Github gh = mock(Github.class);
-        when(gh.getBotName()).thenReturn("flinkbot");
+        Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
@@ -148,8 +152,7 @@ public class FlinkbotTest {
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
                 "questions about the review process or the usage of this bot";
 
-        Github gh = mock(Github.class);
-        when(gh.getBotName()).thenReturn("flinkbot");
+        Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh);
         List<GHIssueComment> comments = new ArrayList<>();
@@ -164,6 +167,7 @@ public class FlinkbotTest {
         assertEquals(EXPECTED, argument.getValue());
     }
      */
+
 
     /**
      * Ensure a complex example
@@ -196,24 +200,26 @@ public class FlinkbotTest {
                 " - `@flinkbot disapprove architecture` to remove an approval\n" +
                 "</details>";
 
-        Github gh = mock(Github.class);
-        when(gh.getBotName()).thenReturn("flinkbot");
+        Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
-        comments.add(createComment("@flinkbot approve description", "fhueske"));
+        comments.add(createComment("@flinkbot approve description.", "fhueske")); // this tests including a "." (dot) at the end
         comments.add(createComment("@flinkbot approve consensus\n@flinkbot approve description\n@flinkbot attention @uce", "trohrmann"));
         comments.add(createComment("@flinkbot disapprove consensus", "trohrmann"));
-
 
         bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
         verify(comments.get(0)).update(argument.capture());
         assertEquals(EXPECTED, argument.getValue());
+
+        // validate labels
+        assertEquals("review=needsConsensusApproval ❌", getLabelsFromMock(gh));
     }
+
 
 
     /**
@@ -249,14 +255,13 @@ public class FlinkbotTest {
                 " - `@flinkbot disapprove architecture` to remove an approval\n" +
                 "</details>";
 
-        Github gh = mock(Github.class);
-        when(gh.getBotName()).thenReturn("flinkbot");
+        Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
-        comments.add(createComment("@flinkbot approve all", "fhueske"));
+        comments.add(createComment("@flinkbot approve all.", "fhueske")); // even with a dot in the end.
 
         bot.updatePullRequestThread(comments);
 
@@ -303,8 +308,7 @@ public class FlinkbotTest {
                 " - `@flinkbot disapprove architecture` to remove an approval\n" +
                 "</details>";
 
-        Github gh = mock(Github.class);
-        when(gh.getBotName()).thenReturn("flinkbot");
+        Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
@@ -391,8 +395,7 @@ public class FlinkbotTest {
                 " - `@flinkbot disapprove architecture` to remove an approval\n" +
                 "</details>";
 
-        Github gh = mock(Github.class);
-        when(gh.getBotName()).thenReturn("flinkbot");
+        Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
@@ -431,8 +434,7 @@ public class FlinkbotTest {
     }
 
     private static void testCommand(String command) throws IOException {
-        Github gh = mock(Github.class);
-        when(gh.getBotName()).thenReturn("flinkbot");
+        Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
         List<GHIssueComment> comments = new ArrayList<>();
@@ -446,6 +448,8 @@ public class FlinkbotTest {
         verify(comments.get(0), never()).update(any());
     }
 
+    // ------------------------------------ testing tools ------------------------------------
+
     private static GHIssueComment createComment(String body, String user) {
         GHIssueComment comment = mock(GHIssueComment.class);
         when(comment.getBody()).thenReturn(body);
@@ -456,4 +460,52 @@ public class FlinkbotTest {
         when(comment.getParent()).thenReturn(issue);
         return comment;
     }
+
+    private static class TestGHIssue extends GHIssue {
+        private GHRepository repo;
+        private Collection<GHLabel> myLabels = new ArrayList<>();
+
+        public TestGHIssue(GHRepository repo) {
+            this.repo = repo;
+        }
+
+        @Override
+        public Collection<GHLabel> getLabels() throws IOException {
+            return myLabels;
+        }
+
+        @Override
+        public GHRepository getRepository() {
+            return repo;
+        }
+
+        @Override
+        public void addLabels(GHLabel... names) throws IOException {
+            myLabels.addAll(Arrays.asList(names));
+        }
+    }
+
+    private static Github getMockedGitHub() throws IOException {
+        Github gh = mock(Github.class);
+        when(gh.getBotName()).thenReturn("flinkbot");
+        GHRepository repo = mock(GHRepository.class);
+        when(gh.getWriteableRepository()).thenReturn(repo);
+        GHIssue issue = new TestGHIssue(repo);
+        when(repo.getIssue(666)).thenReturn(issue);
+        when(repo.getLabel(any())).then((Answer<GHLabel>) invocation -> {
+            String name = invocation.getArgument(0);
+            GHLabel answer = mock(GHLabel.class);
+            when(answer.getName()).thenReturn(name);
+            return answer;
+        });
+        return gh;
+    }
+
+    private static String getLabelsFromMock(Github gh) throws IOException {
+        return gh.getWriteableRepository().getIssue(666).getLabels()
+                .stream()
+                .map(GHLabel::getName)
+                .collect(Collectors.joining(","));
+    }
+
 }
