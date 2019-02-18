@@ -75,6 +75,8 @@ public class FlinkbotTest {
 
         // ensure comment.update() never got called
         verify(comments.get(0), never()).update(any());
+        // ensure "review=needsDescriptionApproval ❌" label has been set
+
     }
 
     /**

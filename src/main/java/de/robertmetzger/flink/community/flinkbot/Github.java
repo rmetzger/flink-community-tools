@@ -26,6 +26,7 @@ public class Github {
      * Idea: only apply the bot to new Flink PRs.
      */
     private final int minPRNumber;
+    private final GitHub writeGitHub;
     private String botName;
 
     public Github(Properties prop) {
@@ -45,10 +46,27 @@ public class Github {
                 throw new RuntimeException("Invalid credentials");
             }
 
+            /*GHRepository repo = cachedGitHub.getRepository("flinkqa/test");
+            GHIssue issue = repo.getIssue(4);
+            // assume "test" exists
+            issue.removeLabels("test");
+            issue.addLabels("test1");
+
+            System.exit(1); */
+
             // also establish an uncached connection with GitHub for notifications processing
             directGitHub = GitHubBuilder.fromEnvironment().withPassword(botName, prop.getProperty("gh.token"))
                     .withConnector(new OkHttp3Connector(new OkUrlFactory(new OkHttpClient.Builder().build())))
                     .build();
+
+            // use an uncached connection for the write connection, as writes can lead to caching issues.
+            writeGitHub = GitHubBuilder.fromEnvironment().withPassword(prop.getProperty("gh.write.user"), prop.getProperty("gh.write.token"))
+                    .withConnector(new OkHttp3Connector(new OkUrlFactory(new OkHttpClient.Builder().build())))
+                    .build();
+
+            if(!writeGitHub.isCredentialValid()) {
+                throw new RuntimeException("Invalid write credentials");
+            }
 
         } catch (IOException e) {
             throw new RuntimeException("Error initializing GitHub", e);
@@ -98,4 +116,8 @@ public class Github {
         return notifications.iterator();
     }
 
+
+    public GHRepository getWriteableRepository() throws IOException {
+        return writeGitHub.getRepository(repository);
+    }
 }

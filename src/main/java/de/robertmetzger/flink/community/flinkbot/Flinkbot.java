@@ -2,12 +2,11 @@ package de.robertmetzger.flink.community.flinkbot;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.kohsuke.github.GHIssue;
-import org.kohsuke.github.GHIssueComment;
-import org.kohsuke.github.GHThread;
+import org.kohsuke.github.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.util.*;
@@ -20,6 +19,15 @@ public class Flinkbot {
     private final String trackingMessage;
 
     private static final String[] VALID_APPROVALS = {"description", "consensus", "architecture", "quality"};
+
+    private static final String LABEL_PREFIX = "review=";
+    private static final String LABEL_COLOR = "bcf5db";
+    private static final String[] LABELS = {LABEL_PREFIX + "needsDescriptionApproval ❌",
+                                            LABEL_PREFIX + "needsConsensusApproval ❌",
+                                            LABEL_PREFIX + "needsArchitectureApproval ❌",
+                                            LABEL_PREFIX + "needsQualityApproval ❌",
+                                            LABEL_PREFIX + "approved ✅",
+                                            };
 
     private final Github gh;
     private final String[] committers;
@@ -76,12 +84,15 @@ public class Flinkbot {
             LOG.info("Commenting with tracking message on PR " + pullToSimpleString(pr));
             try {
                 pr.comment(trackingMessage);
+                // add label
+                updateLabels(Collections.EMPTY_MAP, pr.getNumber());
             } catch (IOException e) {
                 LOG.warn("Error writing tracking message", e);
             }
         }
         LOG.info("Done checking for new PRs. Requests remaining: " + gh.getRemainingRequests());
     }
+
     private boolean pullRequestHasComment(GHIssue pr) {
         try {
             return pr.getComments().stream().anyMatch(comment -> {
@@ -100,7 +111,7 @@ public class Flinkbot {
     }
 
     private boolean isTrackingMessage(String body) {
-        return body.substring(0, Math.min(body.length(), 10)).equals(trackingMessage.substring(0, 10));
+        return body.substring(0, Math.min(body.length(), 70)).equals(trackingMessage.substring(0, 70));
     }
 
     /**
@@ -111,7 +122,7 @@ public class Flinkbot {
     public void processBotMentions(Iterator<GHThread> notifications) {
         while (notifications.hasNext()) {
             GHThread thread = notifications.next();
-            LOG.info("Found a notification with title '" + thread.getTitle() + "': " + thread);
+            LOG.info("Found a notification with title '" + thread.getTitle() + "'");
             try {
                 if(thread.isRead()) {
                     LOG.debug("Skipping read notification with title "+thread.getTitle());
@@ -120,6 +131,7 @@ public class Flinkbot {
                 if (thread.getReason().equals("mention")) {
                     // we immediately mark the notification as read to avoid concurrency issues with newer comments
                     // being posted while still processing the old ones.
+                    LOG.debug("Marking notification with reason '{}' and title '{}' as read", thread.getReason(), thread.getTitle());
                     thread.markAsRead();
                     Thread.sleep(1000); // + sleep some time to ensure we get new comments with this fetch
 
@@ -219,12 +231,12 @@ public class Flinkbot {
             } catch (Throwable t) {
                 LOG.warn("Error processing comment '"+comment.getBody()+"'. Msg: "+t.getMessage(), t);
             }
-
         }
 
         // update tracking comment
         if(trackingComment == null) {
             LOG.warn("Invalid notification? comments do not contain tracking message " + comments);
+            return; // leave method. Updating the labels also depends on a valid tracking comment
         } else {
             // generate comment
             StringBuffer newComment = new StringBuffer();
@@ -279,8 +291,6 @@ public class Flinkbot {
                 newComment.deleteCharAt(newComment.length()-1); // remove trailing newline
                 String newCommentString = newComment.toString();
                 if(!newCommentString.equals(trackingComment.getBody())) {
-                    // LOG.debug("new '{}' old '{}'", newCommentString.length(), trackingComment.getBody().length());
-                    // LOG.debug("new '{}' old '{}'", newCommentString, trackingComment.getBody());
 
                     // need to update
                     trackingComment.update(newCommentString);
@@ -290,6 +300,88 @@ public class Flinkbot {
                 LOG.warn("Error updating tracking comment", e);
             }
         }
+
+        // update labels
+        updateLabels(approvals, trackingComment.getParent().getNumber());
+    }
+
+    /**
+     * Update the labels of the PR based on the approvals
+     */
+    private void updateLabels(Map<String, Set<String>> approvals, int parentId) {
+        try {
+            // get writable connection
+            GHIssue parent = gh.getWriteableRepository().getIssue(parentId);
+            boolean hasDescriptionApproval = hasApproval("description", approvals);
+            boolean hasConsensusApproval = hasApproval("consensus", approvals);
+            boolean hasArchitectureApproval = hasApproval("architecture", approvals);
+            boolean hasQualityApproval = hasApproval("quality", approvals);
+            // approvals are required in order
+            String labelString = LABELS[0];
+            if(hasDescriptionApproval) {
+                labelString = LABELS[1];
+                if(hasConsensusApproval) {
+                    labelString = LABELS[2];
+                    if(hasArchitectureApproval) {
+                        labelString = LABELS[3];
+                        if(hasQualityApproval) {
+                            labelString = LABELS[4];
+                        }
+                    }
+                }
+            }
+
+            // update labels
+            Collection<GHLabel> labels = parent.getLabels();
+            GHLabel reviewLabel = null;
+            for(GHLabel label: labels) {
+                if(label.getName().startsWith(LABEL_PREFIX)) {
+                    if(reviewLabel == null) {
+                        reviewLabel = label;
+                    } else {
+                        LOG.warn("Detected multiple review labels on {}: {} and {}. Deleting it!", parent, reviewLabel.getName(), label.getName());
+                        parent.removeLabels(label);
+                    }
+                }
+            }
+            if(reviewLabel == null) {
+                // add label
+                GHLabel ghLabel = createOrGetLabel(labelString, parent.getRepository());
+                parent.addLabels(ghLabel);
+                LOG.info("Adding label {} to PR {}", labelString, parent.getTitle());
+            } else if(!reviewLabel.getName().equals(labelString)) {
+                LOG.info("Updating label from {} to {} on PR {}", reviewLabel.getName(), labelString, parent.getTitle());
+                parent.removeLabels(reviewLabel);
+
+                GHLabel ghLabel = createOrGetLabel(labelString, parent.getRepository());
+                parent.addLabels(ghLabel);
+            }
+        } catch(Throwable e) {
+            LOG.warn("Error while updating labels", e);
+        }
+
+    }
+
+    private GHLabel createOrGetLabel(String labelString, GHRepository repository) throws IOException {
+        try {
+            return repository.getLabel(labelString);
+        } catch(FileNotFoundException noLabel) {
+           //LOG.debug("Label '{}' did not exist", labelString, noLabel);
+            LOG.info("Label '{}' did not exist, creating it", labelString);
+            return repository.createLabel(labelString, LABEL_COLOR);
+        }
+    }
+
+    private boolean hasApproval(String aspect, Map<String, Set<String>> approvals) {
+        if(approvals == null) {
+            return false;
+        }
+
+        Set<String> approvers = approvals.get(aspect);
+        if(approvers == null) {
+            return false;
+        }
+        return approvers.size() > 0;
     }
 
     private List<String> addCommunityStatus(List<String> ghLogins) {
@@ -312,6 +404,7 @@ public class Flinkbot {
         approver.add("@" + userName);
         approvals.put(approvalName, approver);
     }
+
     private static String pullToSimpleString(GHIssue pr) {
         return "#" + pr.getNumber() + ": " + pr.getTitle();
     }

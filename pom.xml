@@ -22,7 +22,7 @@
     <dependency>
       <groupId>org.kohsuke</groupId>
       <artifactId>github-api</artifactId>
-      <version>1.95</version>
+      <version>1.96-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
