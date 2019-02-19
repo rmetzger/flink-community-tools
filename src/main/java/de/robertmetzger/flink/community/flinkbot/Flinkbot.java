@@ -22,10 +22,10 @@ public class Flinkbot {
 
     private static final String LABEL_PREFIX = "review=";
     private static final String LABEL_COLOR = "bcf5db";
-    private static final String[] LABELS = {LABEL_PREFIX + "needsDescriptionApproval ❌",
-                                            LABEL_PREFIX + "needsConsensusApproval ❌",
-                                            LABEL_PREFIX + "needsArchitectureApproval ❌",
-                                            LABEL_PREFIX + "needsQualityApproval ❌",
+    private static final String[] LABELS = {LABEL_PREFIX + "needsDescriptionApproval ❔",
+                                            LABEL_PREFIX + "needsConsensusApproval ❔",
+                                            LABEL_PREFIX + "needsArchitectureApproval ❔",
+                                            LABEL_PREFIX + "needsQualityApproval ❔",
                                             LABEL_PREFIX + "approved ✅",
                                             };
 
@@ -43,11 +43,11 @@ public class Flinkbot {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* ❌ 1. The [description] looks good.\n" +
-                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ❔ 1. The [description] looks good.\n" +
+                "* ❔ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* ❔ 3. Needs [attention] from.\n" +
-                "* ❌ 4. The change fits into the overall [architecture].\n" +
-                "* ❌ 5. Overall code [quality] is good.\n" +
+                "* ❔ 4. The change fits into the overall [architecture].\n" +
+                "* ❔ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
                 "of the review process." +
@@ -135,9 +135,16 @@ public class Flinkbot {
                     thread.markAsRead();
                     Thread.sleep(1000); // + sleep some time to ensure we get new comments with this fetch
 
-                    List<GHIssueComment> comments = thread.getBoundPullRequest().getComments();
+                    GHPullRequest boundPR = thread.getBoundPullRequest();
+                    List<GHObject> commentsAndReviews = new ArrayList<>();
+                    commentsAndReviews.addAll(boundPR.getComments());
+                    commentsAndReviews.addAll(boundPR.listReviews().asList());
+
+
+                    GHPullRequestReview rev = (GHPullRequestReview) commentsAndReviews.get(commentsAndReviews.size()-1);
+                    List<GHPullRequestReviewComment> revComm = rev.listReviewComments().asList();
                     // sort by date, so that we process mentions in order
-                    Collections.sort(comments, (o1, o2) -> {
+                    Collections.sort(commentsAndReviews, (o1, o2) -> {
                         try {
                             return o1.getCreatedAt().compareTo(o2.getCreatedAt());
                         } catch (IOException e) {
@@ -146,8 +153,8 @@ public class Flinkbot {
                             throw new RuntimeException("Error while sorting", e);
                         }
                     });
-                    //
-                    updatePullRequestThread(comments);
+
+                    updatePullRequestThread(commentsAndReviews);
                 } else {
                     // we will not do anything with this notification.
                     LOG.debug("Marking notification with reason '{}' and title '{}' as read", thread.getReason(), thread.getTitle());
@@ -161,7 +168,7 @@ public class Flinkbot {
     }
 
 
-    /*private */ void updatePullRequestThread(List<GHIssueComment> comments) {
+    /*private */ void updatePullRequestThread(List<GHObject> comments) {
         if(comments == null) {
             LOG.warn("Notification without comments");
             return;
@@ -170,13 +177,25 @@ public class Flinkbot {
         GHIssueComment trackingComment = null;
         Map<String, Set<String>> approvals = new HashMap<>();
         Set<String> attention = new HashSet<>();
-        for(GHIssueComment comment: comments) {
-            if(isTrackingMessage(comment.getBody())) {
-                trackingComment = comment;
-            }
-
+        for(GHObject comment: comments) {
             try {
-                String[] commentLines = comment.getBody().split("\n");
+                // extract body and username.
+                String commentBody;
+                String commentUserName;
+                if(comment instanceof GHIssueComment) {
+                    commentBody = ((GHIssueComment) comment).getBody();
+                    commentUserName = ((GHIssueComment) comment).getUserName();
+                } else if(comment instanceof GHPullRequestReview) {
+                    commentBody = ((GHPullRequestReview) comment).getBody();
+                    commentUserName = ((GHPullRequestReview) comment).getUser().getLogin();
+                } else {
+                    throw new IllegalStateException("Unknown");
+                }
+                if(isTrackingMessage(commentBody) && comment instanceof GHIssueComment) {
+                    trackingComment = (GHIssueComment) comment;
+                }
+
+                String[] commentLines = commentBody.split("\n");
                 for(String line: commentLines) {
                     if(line.contains(botName)) {
                         // remove , or . in the line.
@@ -208,10 +227,10 @@ public class Flinkbot {
                                     if(action.equals("approve")) {
                                         if(approval.equals("all")) {
                                             for(String validApproval: VALID_APPROVALS) {
-                                                addApproval(approvals, validApproval, comment.getUserName());
+                                                addApproval(approvals, validApproval, commentUserName);
                                             }
                                         } else {
-                                            addApproval(approvals, approval, comment.getUserName());
+                                            addApproval(approvals, approval, commentUserName);
                                         }
                                     }
                                     if(action.equals("disapprove")) {
@@ -219,7 +238,7 @@ public class Flinkbot {
                                         if(approver == null) {
                                             approver = new HashSet<>();
                                         }
-                                        approver.remove("@"+comment.getUserName());
+                                        approver.remove("@"+commentUserName);
                                         approvals.put(approval, approver);
                                     }
                                 } else {
@@ -231,7 +250,7 @@ public class Flinkbot {
                     }
                 }
             } catch (Throwable t) {
-                LOG.warn("Error processing comment '"+comment.getBody()+"'. Msg: "+t.getMessage(), t);
+                LOG.warn("Error processing comment '"+comment+"'. Msg: "+t.getMessage(), t);
             }
         }
 
@@ -277,7 +296,7 @@ public class Flinkbot {
                     if (attentionTick) {
                         newComment.append(line.replace("❔", "❗"));
                     } else {
-                        newComment.append(line.replace("❌", "✅"));
+                        newComment.append(line.replace("❔", "✅"));
                     }
                 } else {
                     newComment.append(line);

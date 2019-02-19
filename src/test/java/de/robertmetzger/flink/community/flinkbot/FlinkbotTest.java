@@ -1,16 +1,11 @@
 package de.robertmetzger.flink.community.flinkbot;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 import org.junit.Test;
-import org.kohsuke.github.GHIssue;
-import org.kohsuke.github.GHIssueComment;
-import org.kohsuke.github.GHLabel;
-import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.*;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
@@ -30,11 +25,11 @@ public class FlinkbotTest {
             "\n" +
             "## Review Progress\n" +
             "\n" +
-            "* ❌ 1. The [description] looks good.\n" +
-            "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+            "* ❔ 1. The [description] looks good.\n" +
+            "* ❔ 2. There is [consensus] that the contribution should go into to Flink.\n" +
             "* ❔ 3. Needs [attention] from.\n" +
-            "* ❌ 4. The change fits into the overall [architecture].\n" +
-            "* ❌ 5. Overall code [quality] is good.\n" +
+            "* ❔ 4. The change fits into the overall [architecture].\n" +
+            "* ❔ 5. Overall code [quality] is good.\n" +
             "\n" +
             "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
             "of the review process." +
@@ -60,7 +55,7 @@ public class FlinkbotTest {
         Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
-        List<GHIssueComment> comments = new ArrayList<>();
+        List<GHObject> comments = new ArrayList<>();
         bot.updatePullRequestThread(comments);
     }
 
@@ -72,15 +67,15 @@ public class FlinkbotTest {
         Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
-        List<GHIssueComment> comments = new ArrayList<>();
+        List<GHObject> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
 
         bot.updatePullRequestThread(comments);
 
         // ensure comment.update() never got called
-        verify(comments.get(0), never()).update(any());
-        // ensure "review=needsDescriptionApproval ❌" label has been set
+        verify((GHIssueComment)comments.get(0), never()).update(any());
+        // ensure "review=needsDescriptionApproval ❔" label has been set
 
     }
 
@@ -97,10 +92,10 @@ public class FlinkbotTest {
                 "\n" +
                 "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC]\n" +
-                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ❔ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* ❔ 3. Needs [attention] from.\n" +
-                "* ❌ 4. The change fits into the overall [architecture].\n" +
-                "* ❌ 5. Overall code [quality] is good.\n" +
+                "* ❔ 4. The change fits into the overall [architecture].\n" +
+                "* ❔ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
                 "of the review process." +
@@ -117,7 +112,7 @@ public class FlinkbotTest {
         Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
-        List<GHIssueComment> comments = new ArrayList<>();
+        List<GHObject> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
         comments.add(createComment("@flinkbot approve description", "fhueske"));
@@ -125,7 +120,7 @@ public class FlinkbotTest {
         bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        verify(comments.get(0)).update(argument.capture());
+        verify((GHIssueComment)comments.get(0)).update(argument.capture());
         assertEquals(EXPECTED, argument.getValue());
     }
 
@@ -142,12 +137,12 @@ public class FlinkbotTest {
                 "\n" +
                 "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske\n" +
-                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ❔ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "    - Approved by @fhueske\n" +
-                "* ❌ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-                "* ❌ 4. The change fits into the overall [architecture].\n" +
+                "* ❔ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
+                "* ❔ 4. The change fits into the overall [architecture].\n" +
                 "    - Approved by @fhueske\n" +
-                "* ❌ 5. Overall code [quality] is good.\n" +
+                "* ❔ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
                 "questions about the review process or the usage of this bot";
@@ -182,11 +177,11 @@ public class FlinkbotTest {
                 "\n" +
                 "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC], @trohrmann [committer]\n" +
-                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ❔ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* ❗ 3. Needs [attention] from.\n" +
                 "    - Needs attention by @uce [committer]\n" +
-                "* ❌ 4. The change fits into the overall [architecture].\n" +
-                "* ❌ 5. Overall code [quality] is good.\n" +
+                "* ❔ 4. The change fits into the overall [architecture].\n" +
+                "* ❔ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
                 "of the review process." +
@@ -203,7 +198,7 @@ public class FlinkbotTest {
         Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
-        List<GHIssueComment> comments = new ArrayList<>();
+        List<GHObject> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
         comments.add(createComment("@flinkbot approve description.", "fhueske")); // this tests including a "." (dot) at the end
@@ -213,11 +208,11 @@ public class FlinkbotTest {
         bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        verify(comments.get(0)).update(argument.capture());
+        verify((GHIssueComment)comments.get(0)).update(argument.capture());
         assertEquals(EXPECTED, argument.getValue());
 
         // validate labels
-        assertEquals("review=needsConsensusApproval ❌", getLabelsFromMock(gh));
+        assertEquals("review=needsConsensusApproval ❔", getLabelsFromMock(gh));
     }
 
 
@@ -258,7 +253,7 @@ public class FlinkbotTest {
         Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
-        List<GHIssueComment> comments = new ArrayList<>();
+        List<GHObject> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
         comments.add(createComment("@flinkbot approve all.", "fhueske")); // even with a dot in the end.
@@ -266,7 +261,7 @@ public class FlinkbotTest {
         bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        verify(comments.get(0)).update(argument.capture());
+        verify((GHIssueComment)comments.get(0)).update(argument.capture());
         assertEquals(EXPECTED, argument.getValue());
     }
 
@@ -311,7 +306,7 @@ public class FlinkbotTest {
         Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
-        List<GHIssueComment> comments = new ArrayList<>();
+        List<GHObject> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
 
@@ -335,7 +330,7 @@ public class FlinkbotTest {
         bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        verify(comments.get(0)).update(argument.capture());
+        verify((GHIssueComment)comments.get(0)).update(argument.capture());
         assertEquals(EXPECTED, argument.getValue());
     }
 
@@ -352,11 +347,11 @@ public class FlinkbotTest {
                 "\n" +
                 "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC], @rmetzger [PMC]\n" +
-                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ❔ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* ❗ 3. Needs [attention] from.\n" +
                 "    - Needs attention by @uce [committer]\n" +
-                "* ❌ 4. The change fits into the overall [architecture].\n" +
-                "* ❌ 5. Overall code [quality] is good.\n" +
+                "* ❔ 4. The change fits into the overall [architecture].\n" +
+                "* ❔ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
                 "of the review process." +
@@ -377,11 +372,11 @@ public class FlinkbotTest {
                 "\n" +
                 "* ✅ 1. The [description] looks good.\n" +
                 "    - Approved by @fhueske [PMC], @hansi, @rmetzger [PMC]\n" +
-                "* ❌ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ❔ 2. There is [consensus] that the contribution should go into to Flink.\n" +
                 "* ❗ 3. Needs [attention] from.\n" +
                 "    - Needs attention by @uce [committer]\n" +
-                "* ❌ 4. The change fits into the overall [architecture].\n" +
-                "* ❌ 5. Overall code [quality] is good.\n" +
+                "* ❔ 4. The change fits into the overall [architecture].\n" +
+                "* ❔ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
                 "of the review process." +
@@ -398,7 +393,7 @@ public class FlinkbotTest {
         Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
-        List<GHIssueComment> comments = new ArrayList<>();
+        List<GHObject> comments = new ArrayList<>();
 
         comments.add(createComment("Some other text here.", "rmetzger"));
         comments.add(createComment(INITIAL, "flinkbot"));
@@ -414,7 +409,7 @@ public class FlinkbotTest {
         bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        verify(comments.get(1)).update(argument.capture());
+        verify((GHIssueComment)comments.get(1)).update(argument.capture());
         assertEquals(EXPECTED, argument.getValue());
     }
 
@@ -437,7 +432,7 @@ public class FlinkbotTest {
         Github gh = getMockedGitHub();
 
         Flinkbot bot = new Flinkbot(gh, committer, pmc);
-        List<GHIssueComment> comments = new ArrayList<>();
+        List<GHObject> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
         comments.add(createComment(command, "fhueske"));
@@ -445,7 +440,7 @@ public class FlinkbotTest {
         bot.updatePullRequestThread(comments);
 
         // ensure comment.update() never got called --> Because wrong commands should not update the tracking message
-        verify(comments.get(0), never()).update(any());
+        verify((GHIssueComment)comments.get(0), never()).update(any());
     }
 
     // ------------------------------------ testing tools ------------------------------------
