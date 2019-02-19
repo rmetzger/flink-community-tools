@@ -120,4 +120,16 @@ public class Github {
     public GHRepository getWriteableRepository() throws IOException {
         return writeGitHub.getRepository(repository);
     }
+    public GHUser getUser(String login) throws IOException {
+        return cachedGitHub.getUser(login);
+    }
+
+    public GHPersonSet<GHUser> getCollaborators(String repo) {
+        try {
+            return cachedGitHub.getRepository(repo).getCollaborators();
+        } catch (IOException e) {
+            LOG.warn("Unable to get collaborators for {}", repo);
+            return null;
+        }
+    }
 }

@@ -32,6 +32,8 @@ public class Flinkbot {
     private final Github gh;
     private final String[] committers;
     private final String[] pmc;
+    // cache repo collaborators
+    private Map<String, GHPersonSet<GHUser>> repoCollaborators;
 
 
     public Flinkbot(Github gh, String[] committers, String[] pmc) {
@@ -140,9 +142,6 @@ public class Flinkbot {
                     commentsAndReviews.addAll(boundPR.getComments());
                     commentsAndReviews.addAll(boundPR.listReviews().asList());
 
-
-                    GHPullRequestReview rev = (GHPullRequestReview) commentsAndReviews.get(commentsAndReviews.size()-1);
-                    List<GHPullRequestReviewComment> revComm = rev.listReviewComments().asList();
                     // sort by date, so that we process mentions in order
                     Collections.sort(commentsAndReviews, (o1, o2) -> {
                         try {
@@ -215,7 +214,7 @@ public class Flinkbot {
                                     }
                                     // look for more names
                                     for(int j = i + 3; j < tokens.length; j++) {
-                                        if(tokens[j].substring(0,1).equals("@")) {
+                                        if(tokens[j].length() > 1 && tokens[j].substring(0,1).equals("@")) {
                                             attention.add(tokens[j].trim());
                                         }
                                     }
@@ -305,6 +304,8 @@ public class Flinkbot {
                         nextLine = append;
                         tick = true;
                         attentionTick = true;
+
+                        addAttentionToReviewers(attention, trackingComment.getParent().getNumber());
                     }
                 }
                 // copy the original line
@@ -343,12 +344,59 @@ public class Flinkbot {
     }
 
     /**
+     * Add "attention" mentioned users to the reviewers
+     *
+     */
+    private void addAttentionToReviewers(Set<String> attention, int prID) {
+        Set<String> addReviewers = new HashSet<>(attention);
+        try {
+            GHPullRequest pullRequest = gh.getWriteableRepository().getPullRequest(prID);
+            String fullRepoName = pullRequest.getRepository().getFullName();
+
+            List<GHUser> reviewers = new ArrayList<>(pullRequest.getRequestedReviewers());
+            for(GHUser reviewer: reviewers) {
+                String login = reviewer.getLogin();
+                addReviewers.remove(removeAt(login));
+            }
+
+            // add remaining reviewers
+
+            LOG.info("Assigning new reviewers {} for PR #{}", addReviewers, prID);
+            for(String toAddUsername: addReviewers) {
+                GHUser user = getRepoCollaborators(fullRepoName).byLogin(removeAt(toAddUsername));
+                if(user == null) {
+                    LOG.info("User {} has not been added as a reviewer, because they are not a collaborator of the repo", toAddUsername);
+                } else {
+                    // user is a collaborator, so can be added to the reviewers
+                    reviewers.add(user);
+                }
+
+            }
+            pullRequest.requestReviewers(reviewers);
+
+        } catch(Throwable e) {
+            LOG.warn("Error while updating reviewers", e);
+        }
+    }
+
+    private GHPersonSet<GHUser> getRepoCollaborators(String repo) {
+        if(this.repoCollaborators == null) {
+            repoCollaborators = new HashMap<>();
+        }
+        return repoCollaborators.computeIfAbsent(repo, gh::getCollaborators);
+    }
+
+    // remove @ at the beginning
+    private static String removeAt(String in) {
+        return in.substring(1);
+    }
+    /**
      * Update the labels of the PR based on the approvals
      */
-    private void updateLabels(Map<String, Set<String>> approvals, int parentId) {
+    private void updateLabels(Map<String, Set<String>> approvals, int prID) {
         try {
             // get writable connection
-            GHIssue parent = gh.getWriteableRepository().getIssue(parentId);
+            GHIssue pullRequest = gh.getWriteableRepository().getIssue(prID);
             boolean hasDescriptionApproval = hasApproval("description", approvals);
             boolean hasConsensusApproval = hasApproval("consensus", approvals);
             boolean hasArchitectureApproval = hasApproval("architecture", approvals);
@@ -369,29 +417,29 @@ public class Flinkbot {
             }
 
             // update labels
-            Collection<GHLabel> labels = parent.getLabels();
+            Collection<GHLabel> labels = pullRequest.getLabels();
             GHLabel reviewLabel = null;
             for(GHLabel label: labels) {
                 if(label.getName().startsWith(LABEL_PREFIX)) {
                     if(reviewLabel == null) {
                         reviewLabel = label;
                     } else {
-                        LOG.warn("Detected multiple review labels on {}: {} and {}. Deleting it!", parent, reviewLabel.getName(), label.getName());
-                        parent.removeLabels(label);
+                        LOG.warn("Detected multiple review labels on {}: {} and {}. Deleting it!", pullRequest, reviewLabel.getName(), label.getName());
+                        pullRequest.removeLabels(label);
                     }
                 }
             }
             if(reviewLabel == null) {
                 // add label
-                GHLabel ghLabel = createOrGetLabel(labelString, parent.getRepository());
-                parent.addLabels(ghLabel);
-                LOG.info("Adding label {} to PR {}", labelString, parent.getTitle());
+                GHLabel ghLabel = createOrGetLabel(labelString, pullRequest.getRepository());
+                pullRequest.addLabels(ghLabel);
+                LOG.info("Adding label {} to PR {}", labelString, pullRequest.getTitle());
             } else if(!reviewLabel.getName().equals(labelString)) {
-                LOG.info("Updating label from {} to {} on PR {}", reviewLabel.getName(), labelString, parent.getTitle());
-                parent.removeLabels(reviewLabel);
+                LOG.info("Updating label from {} to {} on PR {}", reviewLabel.getName(), labelString, pullRequest.getTitle());
+                pullRequest.removeLabels(reviewLabel);
 
-                GHLabel ghLabel = createOrGetLabel(labelString, parent.getRepository());
-                parent.addLabels(ghLabel);
+                GHLabel ghLabel = createOrGetLabel(labelString, pullRequest.getRepository());
+                pullRequest.addLabels(ghLabel);
             }
         } catch(Throwable e) {
             LOG.warn("Error while updating labels", e);

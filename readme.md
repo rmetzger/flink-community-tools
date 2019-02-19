@@ -56,6 +56,7 @@ Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-pr
 * [ ] Dynamically query list of contributors from GH
 * [x] Flinkbot does not process mentions in reviews https://github.com/apache/flink/pull/7670#pullrequestreview-202025315
 * [x] Error with . https://github.com/apache/flink/pull/7725 
+* [x] Add attention payer to reviewer
 
 
 ## Future projects
