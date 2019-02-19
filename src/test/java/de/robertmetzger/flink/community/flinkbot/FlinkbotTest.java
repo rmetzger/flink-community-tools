@@ -124,9 +124,9 @@ public class FlinkbotTest {
         assertEquals(EXPECTED, argument.getValue());
     }
 
-    /*
-     * Ensure a multiple approval work
-
+    /**
+     * Ensure multiple approvals work
+     **/
     @Test
     public void testProcessBotMultipleApprovals() throws IOException {
         final String EXPECTED = "Thanks a lot for your contribution to the Apache Flink project. I'm the @flinkbot. I help the community\n" +
@@ -136,32 +136,41 @@ public class FlinkbotTest {
                 "## Review Progress\n" +
                 "\n" +
                 "* ✅ 1. The [description] looks good.\n" +
-                "    - Approved by @fhueske\n" +
-                "* ❔ 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "    - Approved by @fhueske\n" +
-                "* ❔ 3. [Does not need specific [attention] | Needs specific attention for X | Has attention for X by Y]\n" +
-                "* ❔ 4. The change fits into the overall [architecture].\n" +
-                "    - Approved by @fhueske\n" +
+                "    - Approved by @fhueske [PMC]\n" +
+                "* ✅ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "    - Approved by @fhueske [PMC]\n" +
+                "* ❔ 3. Needs [attention] from.\n" +
+                "* ✅ 4. The change fits into the overall [architecture].\n" +
+                "    - Approved by @fhueske [PMC]\n" +
                 "* ❔ 5. Overall code [quality] is good.\n" +
                 "\n" +
-                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have " +
-                "questions about the review process or the usage of this bot";
+                "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
+                "of the review process." +
+                "<details>\n" +
+                "  <summary>Bot commands</summary>\n" +
+                "  The @flinkbot bot supports the following commands:\n" +
+                "\n" +
+                " - `@flinkbot approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+                " - `@flinkbot approve all` to approve all aspects\n" +
+                " - `@flinkbot attention @username1 [@username2 ..]` to require somebody's attention\n" +
+                " - `@flinkbot disapprove architecture` to remove an approval\n" +
+                "</details>";
 
         Github gh = getMockedGitHub();
 
-        Flinkbot bot = new Flinkbot(gh);
-        List<GHIssueComment> comments = new ArrayList<>();
+        Flinkbot bot = new Flinkbot(gh, committer, pmc);
+        List<GHObject> comments = new ArrayList<>();
 
         comments.add(createComment(TRACKING_MESSAGE, "flinkbot"));
         comments.add(createComment("@flinkbot approve description consensus architecture", "fhueske"));
 
-        bot.processBotMentions(comments);
+        bot.updatePullRequestThread(comments);
 
         ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-        verify(comments.get(0)).update(argument.capture());
+        verify((GHIssueComment)comments.get(0)).update(argument.capture());
         assertEquals(EXPECTED, argument.getValue());
     }
-     */
+
 
 
     /**
@@ -204,6 +213,10 @@ public class FlinkbotTest {
         comments.add(createComment("@flinkbot approve description.", "fhueske")); // this tests including a "." (dot) at the end
         comments.add(createComment("@flinkbot approve consensus\n@flinkbot approve description\n@flinkbot attention @uce", "trohrmann"));
         comments.add(createComment("@flinkbot disapprove consensus", "trohrmann"));
+        comments.add(createComment("@flinkbot approve consensus", "hans"));
+        comments.add(createComment("@flinkbot disapprove all", "hans"));
+        comments.add(createComment("@flinkbot approve consensus description", "hans"));
+        comments.add(createComment("@flinkbot disapprove consensus description", "hans"));
 
         bot.updatePullRequestThread(comments);
 

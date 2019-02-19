@@ -50,11 +50,11 @@ Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-pr
 * [x] support `approve all`
 * [ ] if the bot is mentioned in a thread without a tracking message: post one (limit to configured repo)
 * [ ] attention-payers can tell the bot that they approve.
-* [ ] allow multiple approvals, such as `@flinkbot approve description consensus architecture` +2
+* [x] allow multiple approvals, such as `@flinkbot approve description consensus architecture` +2
 * [ ] approve all up to a certain point, such as `@flinkbot approve-until architecture`.
 * [ ] Execute jebsen tests
 * [ ] Dynamically query list of contributors from GH
-* [ ] Flinkbot does not process mentions in reviews https://github.com/apache/flink/pull/7670#pullrequestreview-202025315
+* [x] Flinkbot does not process mentions in reviews https://github.com/apache/flink/pull/7670#pullrequestreview-202025315
 * [x] Error with . https://github.com/apache/flink/pull/7725 
 
 

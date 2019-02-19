@@ -175,8 +175,8 @@ public class Flinkbot {
         }
         LOG.debug("Processing pull request thread with " + comments.size() + " comments");
         GHIssueComment trackingComment = null;
-        Map<String, Set<String>> approvals = new HashMap<>();
-        Set<String> attention = new HashSet<>();
+        final Map<String, Set<String>> trackedApprovals = new HashMap<>();
+        final Set<String> attention = new HashSet<>();
         for(GHObject comment: comments) {
             try {
                 // extract body and username.
@@ -199,7 +199,7 @@ public class Flinkbot {
                 for(String line: commentLines) {
                     if(line.contains(botName)) {
                         // remove , or . in the line.
-                        line = line.replaceAll("[,|.]", "");
+                        line = line.replaceAll("[,.!?]", "");
                         String[] tokens = line.split(" ");
                         for(int i = 0; i < tokens.length; i++) {
                             if(tokens[i].equals(botName)) {
@@ -227,19 +227,35 @@ public class Flinkbot {
                                     if(action.equals("approve")) {
                                         if(approval.equals("all")) {
                                             for(String validApproval: VALID_APPROVALS) {
-                                                addApproval(approvals, validApproval, commentUserName);
+                                                addApproval(trackedApprovals, validApproval, commentUserName);
                                             }
                                         } else {
-                                            addApproval(approvals, approval, commentUserName);
+                                            addApproval(trackedApprovals, approval, commentUserName);
+                                            // go through additional approvals
+                                            for(int j = i + 3; j < tokens.length; j++) {
+                                                String additionalApproval = tokens[j];
+                                                if(ArrayUtils.contains(VALID_APPROVALS, additionalApproval)) {
+                                                    addApproval(trackedApprovals, additionalApproval, commentUserName);
+                                                }
+                                            }
                                         }
                                     }
+                                    // ugly copy-paste action here
                                     if(action.equals("disapprove")) {
-                                        Set<String> approver = approvals.get(approval);
-                                        if(approver == null) {
-                                            approver = new HashSet<>();
+                                        if(approval.equals("all")) {
+                                            for(String validApproval: VALID_APPROVALS) {
+                                                removeApproval(trackedApprovals, validApproval, commentUserName);
+                                            }
+                                        } else {
+                                            removeApproval(trackedApprovals, approval, commentUserName);
+                                            // go through additional disapprovals
+                                            for(int j = i + 3; j < tokens.length; j++) {
+                                                String additionalApproval = tokens[j];
+                                                if(ArrayUtils.contains(VALID_APPROVALS, additionalApproval)) {
+                                                    removeApproval(trackedApprovals, additionalApproval, commentUserName);
+                                                }
+                                            }
                                         }
-                                        approver.remove("@"+commentUserName);
-                                        approvals.put(approval, approver);
                                     }
                                 } else {
                                     LOG.debug("Incomplete command in: " + line);
@@ -270,7 +286,7 @@ public class Flinkbot {
                 for(String approval: VALID_APPROVALS) {
                     if(line.contains("[" + approval + "]")) {
                        String append = "    - Approved by ";
-                       Set<String> approversSet = approvals.get(approval);
+                       Set<String> approversSet = trackedApprovals.get(approval);
                        if(approversSet != null && approversSet.size() > 0) {
                            List<String> approvers = new ArrayList<>(approversSet);
                            Collections.sort(approvers); // equality
@@ -323,7 +339,7 @@ public class Flinkbot {
         }
 
         // update labels
-        updateLabels(approvals, trackingComment.getParent().getNumber());
+        updateLabels(trackedApprovals, trackingComment.getParent().getNumber());
     }
 
     /**
@@ -393,18 +409,6 @@ public class Flinkbot {
         }
     }
 
-    private boolean hasApproval(String aspect, Map<String, Set<String>> approvals) {
-        if(approvals == null) {
-            return false;
-        }
-
-        Set<String> approvers = approvals.get(aspect);
-        if(approvers == null) {
-            return false;
-        }
-        return approvers.size() > 0;
-    }
-
     private List<String> addCommunityStatus(List<String> ghLogins) {
         return ghLogins.stream().map(login -> {
             String noAt = login.replace("@", "");
@@ -417,6 +421,18 @@ public class Flinkbot {
         }).collect(Collectors.toList());
     }
 
+    private boolean hasApproval(String aspect, Map<String, Set<String>> approvals) {
+        if(approvals == null) {
+            return false;
+        }
+
+        Set<String> approvers = approvals.get(aspect);
+        if(approvers == null) {
+            return false;
+        }
+        return approvers.size() > 0;
+    }
+
     private static void addApproval(Map<String, Set<String>> approvals, String approvalName, String userName) {
         Set<String> approver = approvals.get(approvalName);
         if (approver == null) {
@@ -425,6 +441,16 @@ public class Flinkbot {
         approver.add("@" + userName);
         approvals.put(approvalName, approver);
     }
+
+    private void removeApproval(Map<String, Set<String>> trackedApprovals, String approval, String userName) {
+        Set<String> approver = trackedApprovals.get(approval);
+        if(approver == null) {
+            approver = new HashSet<>();
+        }
+        approver.remove("@" + userName);
+        trackedApprovals.put(approval, approver);
+    }
+
 
     private static String pullToSimpleString(GHIssue pr) {
         return "#" + pr.getNumber() + ": " + pr.getTitle();
