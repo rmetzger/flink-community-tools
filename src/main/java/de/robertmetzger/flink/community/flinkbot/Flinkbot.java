@@ -18,14 +18,17 @@ public class Flinkbot {
     private final String botName;
     private final String trackingMessage;
 
+    // order matters
     private static final String[] VALID_APPROVALS = {"description", "consensus", "architecture", "quality"};
 
     private static final String LABEL_PREFIX = "review=";
     private static final String LABEL_COLOR = "bcf5db";
-    private static final String[] LABELS = {LABEL_PREFIX + "needsDescriptionApproval ❔",
-                                            LABEL_PREFIX + "needsConsensusApproval ❔",
-                                            LABEL_PREFIX + "needsArchitectureApproval ❔",
-                                            LABEL_PREFIX + "needsQualityApproval ❔",
+    
+    // order matters
+    private static final String[] LABELS = {LABEL_PREFIX + "needsDescriptionApproval ❓",
+                                            LABEL_PREFIX + "needsConsensusApproval ❓",
+                                            LABEL_PREFIX + "needsArchitectureApproval ❓",
+                                            LABEL_PREFIX + "needsQualityApproval ❓",
                                             LABEL_PREFIX + "approved ✅",
                                             };
 
@@ -45,11 +48,11 @@ public class Flinkbot {
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
-                "* ❔ 1. The [description] looks good.\n" +
-                "* ❔ 2. There is [consensus] that the contribution should go into to Flink.\n" +
-                "* ❔ 3. Needs [attention] from.\n" +
-                "* ❔ 4. The change fits into the overall [architecture].\n" +
-                "* ❔ 5. Overall code [quality] is good.\n" +
+                "* ❓ 1. The [description] looks good.\n" +
+                "* ❓ 2. There is [consensus] that the contribution should go into to Flink.\n" +
+                "* ❓ 3. Needs [attention] from.\n" +
+                "* ❓ 4. The change fits into the overall [architecture].\n" +
+                "* ❓ 5. Overall code [quality] is good.\n" +
                 "\n" +
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
                 "of the review process." +
@@ -256,6 +259,17 @@ public class Flinkbot {
                                             }
                                         }
                                     }
+                                } else if(action.equals("approve-until")) {
+                                    if(!ArrayUtils.contains(VALID_APPROVALS, approval)) {
+                                        LOG.debug("Invalid approval {} in '{}'", approval, line);
+                                        break;
+                                    }
+                                    for(String approveUntil: VALID_APPROVALS) {
+                                        addApproval(trackedApprovals, approveUntil, commentUserName);
+                                        if(approveUntil.equals(approval)) {
+                                            break;
+                                        }
+                                    }
                                 } else {
                                     LOG.debug("Incomplete command in: " + line);
                                     break; // stop processing this line
@@ -311,9 +325,9 @@ public class Flinkbot {
                 // copy the original line
                 if(tick) {
                     if (attentionTick) {
-                        newComment.append(line.replace("❔", "❗"));
+                        newComment.append(line.replace("❓", "❗"));
                     } else {
-                        newComment.append(line.replace("❔", "✅"));
+                        newComment.append(line.replace("❓", "✅"));
                     }
                 } else {
                     newComment.append(line);
