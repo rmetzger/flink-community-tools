@@ -126,7 +126,7 @@ public class Github {
 
     public GHPersonSet<GHUser> getCollaborators(String repo) {
         try {
-            return cachedGitHub.getRepository(repo).getCollaborators();
+            return writeGitHub.getRepository(repo).getCollaborators();
         } catch (IOException e) {
             LOG.warn("Unable to get collaborators for {}", repo);
             return null;
