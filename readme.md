@@ -57,6 +57,10 @@ Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-pr
 * [x] Flinkbot does not process mentions in reviews https://github.com/apache/flink/pull/7670#pullrequestreview-202025315
 * [x] Error with . https://github.com/apache/flink/pull/7725 
 * [x] Add attention payer to reviewer
+* [ ] forbid reviews by the PR author
+* [ ] approved / pending / rejected states for each step
+* [ ] detect special pull requests
+    hotfixes, documentation only, new contributors
 
 
 ## Future projects

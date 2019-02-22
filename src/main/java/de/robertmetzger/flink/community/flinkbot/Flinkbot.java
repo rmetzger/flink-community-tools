@@ -25,10 +25,10 @@ public class Flinkbot {
     private static final String LABEL_COLOR = "bcf5db";
     
     // order matters
-    private static final String[] LABELS = {LABEL_PREFIX + "needsDescriptionApproval ❓",
-                                            LABEL_PREFIX + "needsConsensusApproval ❓",
-                                            LABEL_PREFIX + "needsArchitectureApproval ❓",
-                                            LABEL_PREFIX + "needsQualityApproval ❓",
+    private static final String[] LABELS = {LABEL_PREFIX + "description?",
+                                            LABEL_PREFIX + "consensus?",
+                                            LABEL_PREFIX + "architecture?",
+                                            LABEL_PREFIX + "quality?",
                                             LABEL_PREFIX + "approved ✅",
                                             };
 
@@ -62,6 +62,7 @@ public class Flinkbot {
                 "\n" +
                 " - `"+ botName +" approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
                 " - `"+ botName +" approve all` to approve all aspects\n" +
+                " - `"+ botName +" approve-until architecture` to approve everything until `architecture`\n" +
                 " - `"+ botName +" attention @username1 [@username2 ..]` to require somebody's attention\n" +
                 " - `"+ botName +" disapprove architecture` to remove an approval\n" +
                 "</details>";
@@ -465,7 +466,7 @@ public class Flinkbot {
         try {
             return repository.getLabel(labelString);
         } catch(FileNotFoundException noLabel) {
-           //LOG.debug("Label '{}' did not exist", labelString, noLabel);
+            LOG.debug("Label '{}' did not exist", labelString, noLabel);
             LOG.info("Label '{}' did not exist, creating it", labelString);
             return repository.createLabel(labelString, LABEL_COLOR);
         }

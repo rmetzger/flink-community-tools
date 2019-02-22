@@ -46,7 +46,7 @@ public class FlinkbotTest {
             "</details>";
 
     private static String[] pmc = {"fhueske", "rmetzger"};
-    // this is obviously wrong information, for the same of testing only. sorry :(
+    // this is obviously wrong information, for the sake of testing only. sorry :(
     private static String[] committer = {"trohrmann", "uce"};
 
     /**
@@ -194,7 +194,7 @@ public class FlinkbotTest {
         assertEquals(EXPECTED, argument.getValue());
 
         // validate labels
-        assertEquals("review=needsConsensusApproval ❓", getLabelsFromMock(gh));
+        assertEquals("review=consensus?", getLabelsFromMock(gh));
     }
 
 
