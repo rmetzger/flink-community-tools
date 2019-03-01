@@ -31,18 +31,20 @@ public class FlinkbotTest {
             "* ❓ 4. The change fits into the overall [architecture].\n" +
             "* ❓ 5. Overall code [quality] is good.\n";
 
-    private static final String TRACKING_MESSAGE_2 = "\n" +
+    private static final String TRACKING_MESSAGE_2 =                 "\n" +
             "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
             "of the review process." +
             "<details>\n" +
-            "  <summary>Bot commands</summary>\n" +
+            " The Bot is tracking the review progress through labels. Labels are applied according to the order of the review items. " +
+            "For consensus, approval by a Flink committer of PMC member is required" +
+            " <summary>Bot commands</summary>\n" +
             "  The @flinkbot bot supports the following commands:\n" +
             "\n" +
-            " - `@flinkbot approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+            " - `@flinkbot approve description` to approve one or more aspects (aspects: `description`, `consensus`, `architecture` and `quality`)\n" +
             " - `@flinkbot approve all` to approve all aspects\n" +
             " - `@flinkbot approve-until architecture` to approve everything until `architecture`\n" +
             " - `@flinkbot attention @username1 [@username2 ..]` to require somebody's attention\n" +
-            " - `@flinkbot disapprove architecture` to remove an approval\n" +
+            " - `@flinkbot disapprove architecture` to remove an approval you gave earlier\n" +
             "</details>";
 
     private static String[] pmc = {"fhueske", "rmetzger"};

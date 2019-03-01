@@ -1,5 +1,6 @@
 package de.robertmetzger.flink.community.flinkbot;
 
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.*;
@@ -57,14 +58,16 @@ public class Flinkbot {
                 "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
                 "of the review process." +
                 "<details>\n" +
-                "  <summary>Bot commands</summary>\n" +
+                " The Bot is tracking the review progress through labels. Labels are applied according to the order of the review items. " +
+                "For consensus, approval by a Flink committer of PMC member is required" +
+                " <summary>Bot commands</summary>\n" +
                 "  The "+ botName +" bot supports the following commands:\n" +
                 "\n" +
-                " - `"+ botName +" approve description` to approve the 1st aspect (similarly, it also supports the `consensus`, `architecture` and `quality` keywords)\n" +
+                " - `"+ botName +" approve description` to approve one or more aspects (aspects: `description`, `consensus`, `architecture` and `quality`)\n" +
                 " - `"+ botName +" approve all` to approve all aspects\n" +
                 " - `"+ botName +" approve-until architecture` to approve everything until `architecture`\n" +
                 " - `"+ botName +" attention @username1 [@username2 ..]` to require somebody's attention\n" +
-                " - `"+ botName +" disapprove architecture` to remove an approval\n" +
+                " - `"+ botName +" disapprove architecture` to remove an approval you gave earlier\n" +
                 "</details>";
 
         this.committers = committers;
@@ -96,7 +99,7 @@ public class Flinkbot {
                 LOG.warn("Error writing tracking message", e);
             }
         }
-        LOG.info("Done checking for new PRs. Requests remaining: " + gh.getRemainingRequests());
+        LOG.info("Done checking for new PRs. Requests remaining: " + gh.getRemainingRequests() +" Write requests " + gh.getRemainingWriteRequests());
     }
 
     private boolean pullRequestHasComment(GHIssue pr) {
@@ -354,7 +357,20 @@ public class Flinkbot {
             }
         }
 
-        // update labels
+        // remove non-committer/PMC approvals, then update labels
+        Set<String> committersAndPmc = new HashSet<>();
+        for(String committer: committers) {
+            committersAndPmc.add("@"+committer);
+        }
+        for(String pm: pmc) {
+            committersAndPmc.add("@"+pm);
+        }
+        for(Map.Entry<String, Set<String>> approval: trackedApprovals.entrySet()) {
+            Set<String> approvalSet = approval.getValue();
+            if(approvalSet != null && approvalSet.size() > 0) {
+                approvalSet.retainAll(committersAndPmc);
+            }
+        }
         updateLabels(trackedApprovals, trackingComment.getParent().getNumber());
     }
 
@@ -405,6 +421,7 @@ public class Flinkbot {
     private static String removeAt(String in) {
         return in.substring(1);
     }
+
     /**
      * Update the labels of the PR based on the approvals
      */

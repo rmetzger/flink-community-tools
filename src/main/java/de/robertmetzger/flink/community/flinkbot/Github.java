@@ -104,6 +104,14 @@ public class Github {
             return -1;
         }
     }
+    public int getRemainingWriteRequests() {
+        try {
+            return writeGitHub.getRateLimit().remaining;
+        } catch (IOException e) {
+            LOG.info("Unable to get current rate limit", e);
+            return -1;
+        }
+    }
 
     public Iterator<GHThread> getNewNotificationsIterator() {
         GHNotificationStream notifications = directGitHub.listNotifications();
@@ -132,4 +140,6 @@ public class Github {
             return null;
         }
     }
+
+
 }
