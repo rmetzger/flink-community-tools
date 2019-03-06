@@ -1,0 +1,36 @@
+Configuration:
+  status: warn
+  name: LoggingConfig
+  properties:
+    property:
+      name: filename
+      value: labeler.log
+  thresholdFilter:
+    level: debug
+  appenders:
+    Console:
+      name: STDOUT
+      PatternLayout:
+        Pattern: "%d %p %C{1.} [%t] %m%n"
+
+    File:
+      name: File
+      fileName: ${filename}
+      PatternLayout:
+        Pattern: "%d %p %C{1.} [%t] %m%n"
+      Filters:
+        ThresholdFilter:
+          level: debug
+  Loggers:
+    logger:
+      - name: de.robertmetzger
+        level: debug
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: File
+    Root:
+      level: debug
+      AppenderRef:
+        - ref: STDOUT
+        - ref: File
