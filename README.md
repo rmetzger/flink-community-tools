@@ -41,7 +41,7 @@ Approach 2:
 
 - getting component from JIRA is cached using a table.
 
-JIRA-ID, component (🍭 separated) , lastUpdated
+JIRA-ID, component (# separated) , lastUpdated
 
 if entry doesn't exist in table, fetch it from JIRA, otherwise, return value from table.
 
