@@ -13,18 +13,21 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DiskCachedJira {
+    private static final Logger LOG = LoggerFactory.getLogger(DiskCachedJira.class);
+
+
     private final IssueRestClient issueClient;
     private final Cache cache;
+    private final AsynchronousJiraRestClient restClient;
 
-    /* SearchResult result = restClient.getSearchClient().searchJql(
-         "project = FLINK ORDER BY updated DESC, priority DESC").get();
-     System.out.println("Result " + result); */
 
     public DiskCachedJira(String jiraUrl, Cache cache) throws URISyntaxException {
         final URI jiraServerUri = new URI(jiraUrl);
-        final JiraRestClient restClient = new AsynchronousJiraRestClient(jiraServerUri, new AnonymousAuthenticationHandler());
+        this.restClient = new AsynchronousJiraRestClient(jiraServerUri, new AnonymousAuthenticationHandler());
         this.issueClient = restClient.getIssueClient();
         this.cache = cache;
     }
@@ -50,16 +53,21 @@ public class DiskCachedJira {
         } else {
             List<String> fromJira = getComponentsFromJiraApi(jiraId);
             try {
-                cache.put(jiraId, fromCache);
+                cache.put(jiraId, fromJira);
             } catch (IOException e) {
                 throw new JiraException("Error while putting data into cache", e);
             }
+            LOG.info("Getting components for {} from JIRA server", jiraId);
             return fromJira;
         }
     }
 
-    public void invalidateCache(String issueId) {
-        cache.remove(issueId);
+    public boolean invalidateCache(String issueId) {
+        return cache.remove(issueId);
+    }
+
+    public JiraRestClient getJiraClient() {
+        return this.restClient;
     }
 
     public static class JiraException extends Exception {

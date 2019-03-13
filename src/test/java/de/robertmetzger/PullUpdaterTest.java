@@ -4,13 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import org.junit.Test;
 
 
 public class PullUpdaterTest
 {
     @Test
-    public void testJiraNameExtraction() {
+    public void testJiraNameExtraction() throws IOException {
         PullUpdater pu = new PullUpdater(null, null, null,null);
 
         assertEquals("FLINK-11537", pu.extractJiraId("[BP-1.7][FLINK-11537] Make ExecutionGraph#suspend terminate ExecutionGraph atomically"));

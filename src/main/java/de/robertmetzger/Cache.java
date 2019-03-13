@@ -14,5 +14,5 @@ public interface Cache {
 
     void put(String key, List<String> elements) throws IOException;
 
-    void remove(String key);
+    boolean remove(String key);
 }

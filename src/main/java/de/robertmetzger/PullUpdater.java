@@ -23,24 +23,26 @@ public class PullUpdater {
     private static final String LABEL_COLOR = "175fb7";
     private static final String COMPONENT_PREFIX = "component=";
     private final String repoName;
-    private final GitHub writeGitHub;
+    private final GHRepository readRepo;
+    private final GHRepository writeRepo;
 
     private GitHub readGitHub;
     private DiskCachedJira jira;
 
 
-    public PullUpdater(GitHub readGitHub, GitHub writeGitHub, DiskCachedJira jira, String repo) {
+    public PullUpdater(GitHub readGitHub, GitHub writeGitHub, DiskCachedJira jira, String repo) throws
+        IOException {
         this.readGitHub = readGitHub;
         this.jira = jira;
-        this.writeGitHub = writeGitHub;
         this.repoName = repo;
+
+        readRepo = readGitHub.getRepository(this.repoName);
+        writeRepo = writeGitHub.getRepository(this.repoName);
     }
 
     public void checkPullRequests() throws IOException, DiskCachedJira.JiraException {
-        final GHRepository readRepo = readGitHub.getRepository(this.repoName);
-        final GHRepository writeRepo = writeGitHub.getRepository(this.repoName);
-
         List<GHPullRequest> pullRequests = readRepo.getPullRequests(GHIssueState.ALL);
+        LOG.debug("Getting pull requests {}", readGitHub.getRateLimit());
 
         for (GHPullRequest pullRequest : pullRequests) {
             String jiraId = extractJiraId(pullRequest.getTitle());
@@ -48,32 +50,34 @@ public class PullUpdater {
                 continue;
             }
             List<String> jiraComponents = normalizeComponents(jira.getComponents(jiraId));
-            List<GHLabel> requiredLabels = getComponentLabels(jiraComponents, writeRepo);
+            List<GHLabel> requiredLabels = getComponentLabels(jiraComponents);
             Collection<GHLabel> existingPRLabels = pullRequest.getLabels().stream().filter(l -> l.getName().startsWith(COMPONENT_PREFIX)).collect(
                 Collectors.toList());
+            LOG.debug("Getting existing labels {}", readGitHub.getRateLimit());
             Collection<GHLabel> correctLabels = CollectionUtils.intersection(
                 requiredLabels,
                 existingPRLabels);
             existingPRLabels.removeAll(correctLabels);
             Collection<GHLabel> toRemove = existingPRLabels;
-            pullRequest.removeLabels(toRemove);
 
             requiredLabels.removeAll(correctLabels);
             Collection<GHLabel> toAdd = requiredLabels;
-            pullRequest.addLabels(toAdd);
 
             if(toRemove.size() > 0 || toAdd.size() > 0 ) {
+                GHPullRequest writablePR = writeRepo.getPullRequest(pullRequest.getNumber());
+                writablePR.addLabels(toAdd);
+                writablePR.removeLabels(toRemove);
                 LOG.info("Updating PR '{}' adding labels '{}', removing '{}'", pullRequest.getTitle(), toAdd, toRemove);
             }
         }
     }
 
-    private List<GHLabel> getComponentLabels(List<String> jiraComponents, GHRepository repo) throws
+    private List<GHLabel> getComponentLabels(List<String> jiraComponents) throws
         IOException {
         List<GHLabel> labels = new ArrayList<>(jiraComponents.size());
         for(String label: jiraComponents) {
             try {
-                labels.add(createOrGetLabel(label, repo));
+                labels.add(createOrGetLabel(label));
             } catch(IOException e) {
                 throw new IOException("Error while getting label " + label, e);
             }
@@ -82,13 +86,13 @@ public class PullUpdater {
         return labels;
     }
 
-    private GHLabel createOrGetLabel(String labelString, GHRepository repository) throws IOException {
+    private GHLabel createOrGetLabel(String labelString) throws IOException {
         try {
-            return repository.getLabel(labelString);
+            return readRepo.getLabel(labelString);
         } catch(FileNotFoundException noLabel) {
             //  LOG.debug("Label '{}' did not exist", labelString, noLabel);
             LOG.info("Label '{}' did not exist, creating it", labelString);
-            return repository.createLabel(labelString, LABEL_COLOR);
+            return writeRepo.createLabel(labelString, LABEL_COLOR);
         }
     }
 

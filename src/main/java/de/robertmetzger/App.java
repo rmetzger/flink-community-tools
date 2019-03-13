@@ -38,7 +38,9 @@ public class App {
                                                     null,0
                                                 );
 
-        DiskCachedJira jira = new DiskCachedJira(prop.getProperty("jira.url"), new DiskCache(prop.getProperty("jira.cache")));
+        String cacheDirectory = prop.getProperty("jira.cache");
+
+        DiskCachedJira jira = new DiskCachedJira(prop.getProperty("jira.url"), new DiskCache(cacheDirectory));
         PullUpdater updater = new PullUpdater(cachedGitHub, writableGitHub, jira, prop.getProperty("gh.repo"));
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
@@ -55,7 +57,20 @@ public class App {
             } catch (Throwable t) {
                 LOG.warn("Error while checking for new PRs", t);
             }
+            LOG.info("Done checking pull requests");
         }, 0, checkNewPRSeconds, TimeUnit.SECONDS);
+
+        ScheduledExecutorService jiraInvalidatorExecutor = Executors.newScheduledThreadPool(1);
+        int invalidateJiraSeconds = Integer.valueOf(prop.getProperty("main.invalidateJiraSeconds"));
+
+        JiraCacheInvalidator invalidator = new JiraCacheInvalidator(jira, cacheDirectory);
+        jiraInvalidatorExecutor.scheduleAtFixedRate(() -> {
+            try {
+                invalidator.run();
+            } catch (Throwable t) {
+                LOG.warn("Error while checking for new PRs", t);
+            }
+        }, 0, invalidateJiraSeconds, TimeUnit.SECONDS);
 
     }
 }
