@@ -30,7 +30,7 @@ public class PullUpdaterTest
         List<String> res = PullUpdater.normalizeComponents(Collections.singletonList(
             "Formats(JSON,Avro,Parquet,ORC,SequenceFile)"));
 
-        assertEquals("component=Formats(JSON,Avro,Parquet,ORC,SequenceFi", res.get(0));
+        assertEquals("component=Formats", res.get(0));
 
         res = PullUpdater.normalizeComponents(Collections.singletonList(
             "API/DataSet"));

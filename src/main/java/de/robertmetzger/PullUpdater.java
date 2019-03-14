@@ -195,11 +195,14 @@ public class PullUpdater {
             return Collections.singletonList(COMPONENT_PREFIX+"<none>");
         }
         return components
-                    .stream()
-                    .map(c -> {
-                        String s = COMPONENT_PREFIX + c.replaceAll(" ", "");
-                        return s.substring(0, Math.min(s.length(), 50));
-                    })
-                    .collect(Collectors.toList());
+                .stream()
+                .map(c -> {
+                    if(c.startsWith("Formats(JSON")) {
+                        return COMPONENT_PREFIX + "Formats";
+                    }
+                    String s = COMPONENT_PREFIX + c.replaceAll(" ", "");
+                    return s.substring(0, Math.min(s.length(), 50));
+                })
+                .collect(Collectors.toList());
     }
 }
