@@ -4,29 +4,23 @@ import com.atlassian.jira.rest.client.IssueRestClient;
 import com.atlassian.jira.rest.client.SearchRestClient;
 import com.atlassian.jira.rest.client.domain.BasicIssue;
 import com.atlassian.jira.rest.client.domain.SearchResult;
-import com.atlassian.jira.rest.client.domain.ServerInfo;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Enable HTTP logging:
+ *  -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog -Dorg.apache.commons.logging.simplelog.showdatetime=true -Dorg.apache.commons.logging.simplelog.log.org.apache.http=DEBUG -Dorg.apache.commons.logging.simplelog.log.org.apache.http.wire=ERROR
+ */
 public class JiraCacheInvalidator {
 
     private static Logger LOG = LoggerFactory.getLogger(App.class);
@@ -85,7 +79,9 @@ public class JiraCacheInvalidator {
         String jql = "project = FLINK AND updatedDate  >= \""+jqlDateFormat.format(lastUpdated)+"\" ORDER BY updated DESC";
         LOG.debug("jql = {}", jql);
         SearchResult result = searchClient.searchJql(jql, 1000, 0).get();
+
         LOG.info("Processing {} JIRA tickets since {}", result.getTotal(), lastUpdated);
+
         Iterator<BasicIssue> resultIterator = result.getIssues().iterator();
         int i = 0;
         while(resultIterator.hasNext()) {

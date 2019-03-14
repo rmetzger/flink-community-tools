@@ -27,6 +27,7 @@ public class DiskCachedJira {
 
     public DiskCachedJira(String jiraUrl, Cache cache) throws URISyntaxException {
         final URI jiraServerUri = new URI(jiraUrl);
+
         this.restClient = new AsynchronousJiraRestClient(jiraServerUri, new AnonymousAuthenticationHandler());
         this.issueClient = restClient.getIssueClient();
         this.cache = cache;

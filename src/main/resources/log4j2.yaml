@@ -29,6 +29,17 @@ Configuration:
         AppenderRef:
           - ref: STDOUT
           - ref: File
+      - name: org.apache.http
+        level: debug
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+      - name: org.apache.http.wire
+        level: debug
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+
     Root:
       level: debug
       AppenderRef:
