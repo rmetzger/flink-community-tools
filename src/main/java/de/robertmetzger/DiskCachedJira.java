@@ -1,11 +1,12 @@
 package de.robertmetzger;
 
-import com.atlassian.jira.rest.client.IssueRestClient;
-import com.atlassian.jira.rest.client.JiraRestClient;
+
+import com.atlassian.jira.rest.client.api.IssueRestClient;
+import com.atlassian.jira.rest.client.api.JiraRestClient;
+import com.atlassian.jira.rest.client.api.domain.BasicComponent;
+import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.auth.AnonymousAuthenticationHandler;
-import com.atlassian.jira.rest.client.domain.BasicComponent;
-import com.atlassian.jira.rest.client.domain.Issue;
-import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClient;
+import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,13 +23,14 @@ public class DiskCachedJira {
 
     private final IssueRestClient issueClient;
     private final Cache cache;
-    private final AsynchronousJiraRestClient restClient;
+    private final JiraRestClient restClient;
 
 
     public DiskCachedJira(String jiraUrl, Cache cache) throws URISyntaxException {
         final URI jiraServerUri = new URI(jiraUrl);
 
-        this.restClient = new AsynchronousJiraRestClient(jiraServerUri, new AnonymousAuthenticationHandler());
+        AsynchronousJiraRestClientFactory factory = new AsynchronousJiraRestClientFactory();
+        this.restClient = factory.create(jiraServerUri, new AnonymousAuthenticationHandler());
         this.issueClient = restClient.getIssueClient();
         this.cache = cache;
     }
