@@ -190,13 +190,16 @@ public class PullUpdater {
         return null;
     }
 
-    public List<String> normalizeComponents(List<String> components) {
+    public static List<String> normalizeComponents(List<String> components) {
         if(components.size() == 0) {
             return Collections.singletonList(COMPONENT_PREFIX+"<none>");
         }
         return components
                     .stream()
-                    .map(c -> COMPONENT_PREFIX + c.replaceAll(" ", ""))
+                    .map(c -> {
+                        String s = COMPONENT_PREFIX + c.replaceAll(" ", "");
+                        return s.substring(0, Math.min(s.length(), 50));
+                    })
                     .collect(Collectors.toList());
     }
 }
