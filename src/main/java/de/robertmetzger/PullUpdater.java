@@ -38,6 +38,8 @@ public class PullUpdater {
 
     private DiskCachedJira jira;
 
+    private static List<GHPullRequest> cachedPRs = null;
+
 
     public PullUpdater(Properties prop, DiskCachedJira jira, String repoName) throws
         IOException {
@@ -105,11 +107,19 @@ public class PullUpdater {
 
         // Use a deterministic query (only the last page changes)
         // TODO: this doesn't work
-        GHPullRequestQueryBuilder prQuery = cachedRepoForPulls.queryPullRequests();
-        prQuery.state(GHIssueState.ALL);
-        prQuery.sort(GHPullRequestQueryBuilder.Sort.CREATED);
-        prQuery.direction(GHDirection.ASC);
-        List<GHPullRequest> pullRequests = prQuery.list().asList();
+
+        // TODO remove poor man's caching :)
+        List<GHPullRequest> pullRequests;
+        if(cachedPRs == null) {
+            GHPullRequestQueryBuilder prQuery = cachedRepoForPulls.queryPullRequests();
+            prQuery.state(GHIssueState.ALL);
+            prQuery.sort(GHPullRequestQueryBuilder.Sort.CREATED);
+            prQuery.direction(GHDirection.ASC);
+            pullRequests = prQuery.list().asList();
+            cachedPRs = pullRequests;
+        } else {
+            pullRequests = cachedPRs;
+        }
 
         LOG.info("Retrieved " + pullRequests.size());
         try {

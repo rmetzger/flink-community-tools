@@ -29,7 +29,6 @@ public class JiraCacheInvalidator {
     private final File dataFile;
     private final SearchRestClient searchClient;
     private final static Charset UTF8 = Charset.forName("UTF-8");
-    private final IssueRestClient issueClient;
 
 
     public JiraCacheInvalidator(DiskCachedJira jira, String dataDirectory){
@@ -49,7 +48,6 @@ public class JiraCacheInvalidator {
         }
         // initialize JIRA search client
         this.searchClient = jira.getJiraClient().getSearchClient();
-        this.issueClient = jira.getJiraClient().getIssueClient();
     }
 
     /*
