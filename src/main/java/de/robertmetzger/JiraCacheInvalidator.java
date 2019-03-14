@@ -4,17 +4,23 @@ import com.atlassian.jira.rest.client.IssueRestClient;
 import com.atlassian.jira.rest.client.SearchRestClient;
 import com.atlassian.jira.rest.client.domain.BasicIssue;
 import com.atlassian.jira.rest.client.domain.SearchResult;
+import com.atlassian.jira.rest.client.domain.ServerInfo;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
@@ -32,7 +38,7 @@ public class JiraCacheInvalidator {
     private final IssueRestClient issueClient;
 
 
-    public JiraCacheInvalidator(DiskCachedJira jira, String dataDirectory) {
+    public JiraCacheInvalidator(DiskCachedJira jira, String dataDirectory){
         this.jira = jira;
         // initialize time-tracking
         this.dataFile = new File(dataDirectory, "__last-invalidator-run");
@@ -52,24 +58,30 @@ public class JiraCacheInvalidator {
         this.issueClient = jira.getJiraClient().getIssueClient();
     }
 
+    /*
+     * The following two methods handle time. We use java.time.Instant, which is UTC-based.
+     * JIRA is also using time in UTC.
+     */
+
     private void writeCurrentTimeToDataFile() throws IOException {
         FileOutputStream fos = new FileOutputStream(dataFile);
-        fos.write(Long.toString(System.currentTimeMillis()).getBytes(UTF8));
+        Instant now = Instant.now();
+        fos.write(Long.toString(now.toEpochMilli()).getBytes(UTF8));
         fos.close();
     }
-    private Date getLastUpdateTime() throws IOException {
+    private Instant getLastUpdateTime() throws IOException {
         byte[] encoded = Files.readAllBytes(dataFile.toPath());
         String tsString = new String(encoded, UTF8);
-        return new Date(Long.parseLong(tsString));
+        return Instant.ofEpochMilli((Long.parseLong(tsString)));
     }
 
 
     public void run() throws ExecutionException, InterruptedException, IOException {
         LOG.info("Invalidating updated JIRA tickets");
-        Date lastUpdated = getLastUpdateTime();
+        Instant lastUpdated = getLastUpdateTime();
 
         // search for tickets
-        DateFormat jqlDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        DateTimeFormatter jqlDateFormat = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm").withZone( ZoneId.of("UTC"));;
         String jql = "project = FLINK AND updatedDate  >= \""+jqlDateFormat.format(lastUpdated)+"\" ORDER BY updated DESC";
         LOG.debug("jql = {}", jql);
         SearchResult result = searchClient.searchJql(jql, 1000, 0).get();

@@ -28,10 +28,11 @@ public class Utils {
         return prop;
     }
 
-    public static GitHub getGitHub(String user, String password, String cacheDir, int cacheMB) throws IOException {
+    public static GitHubWithCache getGitHub(String user, String password, String cacheDir, int cacheMB) throws IOException {
         GitHubBuilder ghBuilder = GitHubBuilder.fromEnvironment().withPassword(user, password);
+        Cache cache = null;
         if(cacheDir != null) {
-            Cache cache = new Cache(new File(cacheDir), cacheMB * 1024 * 1024);
+            cache = new Cache(new File(cacheDir), cacheMB * 1024 * 1024);
             OkHttpClient.Builder okHttpClient = new OkHttpClient.Builder();
             okHttpClient.cache(cache);
             ghBuilder.withConnector(new OkHttp3Connector(new OkUrlFactory(okHttpClient.build())));
@@ -40,6 +41,17 @@ public class Utils {
         if (!gh.isCredentialValid()) {
             throw new RuntimeException("Invalid credentials");
         }
-        return gh;
+
+        return new GitHubWithCache(gh, cache);
+    }
+
+    public static class GitHubWithCache {
+        public final GitHub gitHub;
+        public final Cache cache;
+
+        public GitHubWithCache(GitHub gitHub, Cache cache) {
+            this.gitHub = gitHub;
+            this.cache = cache;
+        }
     }
 }

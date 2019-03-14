@@ -12,7 +12,7 @@ public class PullUpdaterTest
 {
     @Test
     public void testJiraNameExtraction() throws IOException {
-        PullUpdater pu = new PullUpdater(null, null, null,null);
+        PullUpdater pu = new PullUpdater(null, null, null);
 
         assertEquals("FLINK-11537", pu.extractJiraId("[BP-1.7][FLINK-11537] Make ExecutionGraph#suspend terminate ExecutionGraph atomically"));
         assertEquals("FLINK-11838", pu.extractJiraId("FLINK-11838 Add GCS RecoverableWriter"));

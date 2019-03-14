@@ -32,7 +32,7 @@ Approach 1:
     
     
     
-Approach 2:
+Approach 2 [implemented]
 
 - get all GitHub PRs (must be cached to stay within the GH rate limit :) )
 - for each GH PR, get the component from JIRA
