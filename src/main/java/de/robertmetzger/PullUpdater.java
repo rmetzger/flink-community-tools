@@ -116,7 +116,7 @@ public class PullUpdater {
             prQuery.sort(GHPullRequestQueryBuilder.Sort.CREATED);
             prQuery.direction(GHDirection.ASC);
             pullRequests = prQuery.list().asList();
-            cachedPRs = pullRequests;
+        //TODO DISABBLE CACHING    cachedPRs = pullRequests;
         } else {
             pullRequests = cachedPRs;
         }
