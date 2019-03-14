@@ -1,15 +1,13 @@
 package de.robertmetzger;
 
-import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.kohsuke.github.GitHub;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
-import sun.util.logging.PlatformLogger;
+
 
 /**
  * Hello world!
