@@ -34,11 +34,12 @@ Configuration:
         additivity: false
         AppenderRef:
           - ref: STDOUT
-      - name: org.apache.http.wire
-        level: debug
+      - name: com.atlassian.httpclient.apache.httpcomponents.cache
+        level: info
         additivity: false
         AppenderRef:
           - ref: STDOUT
+          - ref: File
 
     Root:
       level: debug

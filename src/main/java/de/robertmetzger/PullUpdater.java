@@ -197,7 +197,7 @@ public class PullUpdater {
         return components
                 .stream()
                 .map(c -> {
-                    if(c.startsWith("Formats(JSON")) {
+                    if(c.startsWith("Formats")) {
                         return COMPONENT_PREFIX + "Formats";
                     }
                     String s = COMPONENT_PREFIX + c.replaceAll(" ", "");
