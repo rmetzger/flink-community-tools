@@ -54,4 +54,14 @@ public class Utils {
             this.cache = cache;
         }
     }
+
+    public static String getVersion() {
+        Properties properties = new Properties();
+        try {
+            properties.load(Utils.class.getClassLoader().getResourceAsStream("git.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return properties.getProperty("git.commit.id");
+    }
 }

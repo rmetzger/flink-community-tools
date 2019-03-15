@@ -22,7 +22,7 @@ public class App {
             PlatformLogger.Level.ALL); */
 
 
-        LOG.info("Launching PR labeler");
+        LOG.info("Launching PR labeler version {}", Utils.getVersion());
         Properties prop = Utils.getConfig("/config.properties");
 
         String cacheDirectory = prop.getProperty("jira.cache");
