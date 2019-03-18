@@ -36,12 +36,23 @@ public class DiskCachedJira {
     }
 
     private List<String> getComponentsFromJiraApi(String issueId) throws JiraException {
-        final Issue issue;
-        try {
-            issue = issueClient.getIssue(issueId).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new JiraException("Error while retrieving data from Jira", e);
+        Issue issue = null;
+        int trie = 0;
+        Throwable last = null;
+        while(trie++ < 4) {
+            try {
+                issue = issueClient.getIssue(issueId).get();
+                last = null;
+                break; // successfully got issue
+            } catch (Throwable t) {
+                LOG.info("Got exception while getting Jira ticket " + issueId + " try " + trie, t);
+                last = t;
+            }
         }
+        if(last != null) {
+            throw new JiraException("Error while retrieving data from Jira", last);
+        }
+
 
         return StreamSupport
             .stream(issue.getComponents().spliterator(),false)
