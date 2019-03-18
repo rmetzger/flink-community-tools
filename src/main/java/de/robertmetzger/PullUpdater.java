@@ -1,6 +1,8 @@
 package de.robertmetzger;
 
+
 import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,13 +37,12 @@ public class PullUpdater {
     private final GHRepository uncachedRepoForWritingLabels;
     private final GHRepository cachedRepoForPulls;
     private final GHRepository cachedRepoForLabels;
+    private final PullRequestLabelCache labelCache;
 
     private DiskCachedJira jira;
 
-    private static List<GHPullRequest> cachedPRs = null;
 
-
-    public PullUpdater(Properties prop, DiskCachedJira jira, String repoName) throws
+    public PullUpdater(Properties prop, DiskCachedJira jira, PullRequestLabelCache labelCache, String repoName) throws
         IOException {
         this.jira = jira;
 
@@ -68,6 +69,8 @@ public class PullUpdater {
             null,0
         ).gitHub;
         this.uncachedRepoForWritingLabels = uncachedGitHubForWritingLabels.getRepository(repoName);
+        this.labelCache = labelCache;
+
     }
 
     public void checkPullRequests() throws IOException, DiskCachedJira.JiraException {
@@ -108,22 +111,18 @@ public class PullUpdater {
         // Use a deterministic query (only the last page changes)
         // TODO: this doesn't work
 
-        // TODO remove poor man's caching :)
-        List<GHPullRequest> pullRequests;
-        if(cachedPRs == null) {
-            GHPullRequestQueryBuilder prQuery = cachedRepoForPulls.queryPullRequests();
-            prQuery.state(GHIssueState.ALL);
-            prQuery.sort(GHPullRequestQueryBuilder.Sort.CREATED);
-            prQuery.direction(GHDirection.ASC);
-            pullRequests = prQuery.list().asList();
-        //TODO DISABBLE CACHING    cachedPRs = pullRequests;
-        } else {
-            pullRequests = cachedPRs;
-        }
+        List<GHPullRequest> pullRequests = null;
 
-        LOG.info("Retrieved " + pullRequests.size());
+        GHPullRequestQueryBuilder prQuery = cachedRepoForPulls.queryPullRequests();
+        prQuery.state(GHIssueState.ALL);
+        prQuery.sort(GHPullRequestQueryBuilder.Sort.CREATED);
+        prQuery.direction(GHDirection.ASC);
+        pullRequests = prQuery.list().asList();
+
+
+        LOG.info("Retrieved " + pullRequests.size() + " pull requests");
         try {
-            LOG.info("Checking pull requests. GitHub API limits read: {}, write: {}", cachedGitHubForPulls.getRateLimit(), uncachedGitHubForWritingLabels.getRateLimit());
+            LOG.info("GitHub API limits read: {}, write: {}", cachedGitHubForPulls.getRateLimit(), uncachedGitHubForWritingLabels.getRateLimit());
         } catch (IOException e) {
             LOG.warn("Error while getting rate limits", e);
         }
@@ -136,7 +135,8 @@ public class PullUpdater {
             }
             List<String> jiraComponents = normalizeComponents(jira.getComponents(jiraId));
             List<GHLabel> requiredLabels = getComponentLabels(jiraComponents);
-            Collection<GHLabel> existingPRLabels = pullRequest.getLabels().stream().filter(l -> l.getName().startsWith(COMPONENT_PREFIX)).collect(
+
+            Collection<GHLabel> existingPRLabels = labelCache.getLabelsFor(pullRequest).stream().filter(l -> l.getName().startsWith(COMPONENT_PREFIX)).collect(
                 Collectors.toList());
             Collection<GHLabel> correctLabels = CollectionUtils.intersection(
                 requiredLabels,
@@ -181,11 +181,11 @@ public class PullUpdater {
         }
     }
 
-    private static Pattern pattern = Pattern.compile(".*(FLINK-[0-9]+).*");
-    public String extractJiraId(String title) {
+    private static Pattern pattern = Pattern.compile("(?i).*(FLINK-[0-9]+).*");
+    public static String extractJiraId(String title) {
         Matcher matcher = pattern.matcher(title);
         if (matcher.find()) {
-            return matcher.group(1);
+            return matcher.group(1).toUpperCase();
         }
         return null;
     }

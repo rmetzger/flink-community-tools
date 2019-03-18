@@ -28,7 +28,8 @@ public class App {
         String cacheDirectory = prop.getProperty("jira.cache");
 
         DiskCachedJira jira = new DiskCachedJira(prop.getProperty("jira.url"), new DiskCache(cacheDirectory));
-        PullUpdater updater = new PullUpdater(prop, jira, prop.getProperty("gh.repo"));
+        PullRequestLabelCache labelCache = new PullRequestLabelCache(prop.getProperty("main.labelCache"));
+        PullUpdater updater = new PullUpdater(prop, jira, labelCache, prop.getProperty("gh.repo"));
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         int checkNewPRSeconds = Integer.valueOf(prop.getProperty("main.checkNewPRSeconds"));
