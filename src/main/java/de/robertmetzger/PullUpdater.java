@@ -134,31 +134,31 @@ public class PullUpdater {
                 continue;
             }
             List<String> jiraComponents = normalizeComponents(jira.getComponents(jiraId));
-            List<GHLabel> requiredLabels = getComponentLabels(jiraComponents);
+            List<String> requiredLabels = getComponentLabels(jiraComponents);
 
-            Collection<GHLabel> existingPRLabels = labelCache.getLabelsFor(pullRequest).stream().filter(l -> l.getName().startsWith(COMPONENT_PREFIX)).collect(
+            Collection<String> existingPRLabels = labelCache.getLabelsFor(pullRequest).stream().filter(l -> l.startsWith(COMPONENT_PREFIX)).collect(
                 Collectors.toList());
-            Collection<GHLabel> correctLabels = CollectionUtils.intersection(
+            Collection<String> correctLabels = CollectionUtils.intersection(
                 requiredLabels,
                 existingPRLabels);
             existingPRLabels.removeAll(correctLabels);
-            Collection<GHLabel> toRemove = existingPRLabels;
+            Collection<String> toRemove = existingPRLabels;
 
             requiredLabels.removeAll(correctLabels);
-            Collection<GHLabel> toAdd = requiredLabels;
+            Collection<String> toAdd = requiredLabels;
 
             if(toRemove.size() > 0 || toAdd.size() > 0 ) {
                 GHPullRequest writablePR = uncachedRepoForWritingLabels.getPullRequest(pullRequest.getNumber());
-                writablePR.addLabels(toAdd);
-                writablePR.removeLabels(toRemove);
+                writablePR.addLabels(toAdd.toArray(new String[]{}));
+                writablePR.removeLabels(toRemove.toArray(new String[]{}));
                 LOG.info("Updating PR '{}' adding labels '{}', removing '{}'", pullRequest.getTitle(), toAdd, toRemove);
             }
         }
     }
 
-    private List<GHLabel> getComponentLabels(List<String> jiraComponents) throws
+    private List<String> getComponentLabels(List<String> jiraComponents) throws
         IOException {
-        List<GHLabel> labels = new ArrayList<>(jiraComponents.size());
+        List<String> labels = new ArrayList<>(jiraComponents.size());
         for(String label: jiraComponents) {
             try {
                 labels.add(createOrGetLabel(label));
@@ -170,14 +170,14 @@ public class PullUpdater {
         return labels;
     }
 
-    private GHLabel createOrGetLabel(String labelString) throws IOException {
+    private String createOrGetLabel(String labelString) throws IOException {
         try {
-            return cachedRepoForLabels.getLabel(labelString);
+            return cachedRepoForLabels.getLabel(labelString).getName();
         } catch(FileNotFoundException noLabel) {
             //  LOG.debug("Label '{}' did not exist", labelString, noLabel);
             LOG.info("Label '{}' did not exist, creating it", labelString);
             gitHubForLabelsCache.evictAll(); // empty the cache for getting labels so that the newly created label can be found
-            return uncachedRepoForWritingLabels.createLabel(labelString, LABEL_COLOR);
+            return uncachedRepoForWritingLabels.createLabel(labelString, LABEL_COLOR).getName();
         }
     }
 

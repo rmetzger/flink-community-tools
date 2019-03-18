@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class PullRequestLabelCache {
         }
     }
 
-    public Collection<GHLabel> getLabelsFor(GHPullRequest pullRequest) throws IOException {
+    public Collection<String> getLabelsFor(GHPullRequest pullRequest) throws IOException {
         File fileOnDisk = locateFile(Integer.toString(pullRequest.getNumber()));
         if(!fileOnDisk.exists()) {
             return getAndCache(pullRequest, fileOnDisk);
@@ -57,11 +58,11 @@ public class PullRequestLabelCache {
         }
     }
 
-    private Collection<GHLabel> getAndCache(GHPullRequest pullRequest, File fileOnDisk) throws
+    private Collection<String> getAndCache(GHPullRequest pullRequest, File fileOnDisk) throws
         IOException {
         LOG.info("Getting labels for PR #{} from GitHub", pullRequest.getNumber());
         CacheEntry entry = new CacheEntry();
-        entry.labels = pullRequest.getLabels();
+        entry.labels = pullRequest.getLabels().stream().map(GHLabel::getName).collect(Collectors.toList());
         entry.lastUpdated = pullRequest.getUpdatedAt();
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileOnDisk)))  {
             oos.writeObject(entry);
@@ -71,7 +72,7 @@ public class PullRequestLabelCache {
 
     public static class CacheEntry implements Serializable {
         public Date lastUpdated;
-        public Collection<GHLabel> labels;
+        public Collection<String> labels;
     }
 
     private File locateFile(String key) {
