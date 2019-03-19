@@ -116,7 +116,7 @@ public class PullUpdater {
         GHPullRequestQueryBuilder prQuery = cachedRepoForPulls.queryPullRequests();
         prQuery.state(GHIssueState.ALL);
         prQuery.sort(GHPullRequestQueryBuilder.Sort.CREATED);
-        prQuery.direction(GHDirection.ASC);
+        prQuery.direction(GHDirection.DESC); // start with newest PRs
         pullRequests = prQuery.list().asList();
 
 

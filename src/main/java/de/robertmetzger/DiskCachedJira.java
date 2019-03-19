@@ -45,7 +45,12 @@ public class DiskCachedJira {
                 last = null;
                 break; // successfully got issue
             } catch (Throwable t) {
-                LOG.info("Got exception while getting Jira ticket " + issueId + " try " + trie, t);
+                LOG.info("Got exception while getting Jira ticket " + issueId + " try " + trie + ". Waiting for 30 seconds.", t);
+                try {
+                    Thread.sleep(30 * 1000); // wait for 30 seconds
+                } catch (InterruptedException e) {
+                    continue; // stop waiting, try next.
+                }
                 last = t;
             }
         }
