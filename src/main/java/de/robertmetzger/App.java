@@ -31,17 +31,28 @@ public class App {
         PullRequestLabelCache labelCache = new PullRequestLabelCache(prop.getProperty("main.labelCache"));
         PullUpdater updater = new PullUpdater(prop, jira, labelCache, prop.getProperty("gh.repo"));
 
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         int checkNewPRSeconds = Integer.valueOf(prop.getProperty("main.checkNewPRSeconds"));
 
-        executor.scheduleAtFixedRate(() -> {
-            try {
-                updater.checkPullRequests();
-            } catch (Throwable t) {
-                LOG.warn("Error while checking for new PRs", t);
+        Runnable checkPRs = () -> {
+            while(true) {
+                try {
+                    updater.checkPullRequests();
+                } catch (Throwable t) {
+                    LOG.warn("Error while checking for new PRs", t);
+                }
+                LOG.info("Done checking pull requests. Waiting for {} seconds", checkNewPRSeconds);
+                try {
+                    Thread.sleep(checkNewPRSeconds * 1000);
+                } catch (InterruptedException e) {
+                    LOG.warn("Thread got interrupted");
+                    break;
+                }
             }
-            LOG.info("Done checking pull requests");
-        }, 0, checkNewPRSeconds, TimeUnit.SECONDS);
+        };
+
+        Thread checkPRThread = new Thread(checkPRs);
+        checkPRThread.setName("check-pr-thread");
+        checkPRThread.start();
 
         ScheduledExecutorService jiraInvalidatorExecutor = Executors.newScheduledThreadPool(1);
         int invalidateJiraSeconds = Integer.valueOf(prop.getProperty("main.invalidateJiraSeconds"));
