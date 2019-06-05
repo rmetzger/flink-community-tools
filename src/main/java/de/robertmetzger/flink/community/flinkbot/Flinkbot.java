@@ -379,7 +379,13 @@ public class Flinkbot {
      *
      */
     private void addAttentionToReviewers(Set<String> attention, int prID) {
-        Set<String> addReviewers = new HashSet<>(attention);
+
+        //
+        // Disable attention to reviewers, because it doesn't work at the moment
+        //
+        return;
+
+        /*Set<String> addReviewers = new HashSet<>(attention);
         try {
             GHPullRequest pullRequest = gh.getWriteableRepository().getPullRequest(prID);
             String fullRepoName = pullRequest.getRepository().getFullName();
@@ -407,7 +413,7 @@ public class Flinkbot {
 
         } catch(Throwable e) {
             LOG.warn("Error while updating reviewers", e);
-        }
+        } */
     }
 
     private GHPersonSet<GHUser> getRepoCollaborators(String repo) {
