@@ -1,6 +1,5 @@
 package de.robertmetzger.flink.community.flinkbot;
 
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.*;
@@ -11,6 +10,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Flinkbot {
@@ -21,6 +22,12 @@ public class Flinkbot {
 
     // order matters
     private static final String[] VALID_APPROVALS = {"description", "consensus", "architecture", "quality"};
+
+    private static final Pattern GET_SHA_PATTERN = Pattern.compile(".* ([a-z0-9]{40}) \\(.*\\)");
+
+    private static final PullRequestCheck[] PULL_REQUEST_CHECK = {
+        new PomChangesCheck(), new DocumentationCheck(), new AssignedJiraCheck()
+    };
 
     private static final String LABEL_PREFIX = "review=";
     private static final String LABEL_COLOR = "bcf5db";
@@ -46,6 +53,12 @@ public class Flinkbot {
         this.trackingMessage = "Thanks a lot for your contribution to the Apache Flink project. I'm the "+ botName +". I help the community\n" +
                 "to review your pull request. We will use this comment to track the progress of the review.\n" +
                 "\n" +
+                "\n" +
+                "## Automated Checks" +
+                "\n" +
+                "Last runCheck on commit xxx (Fri, May 24, 2pm CET)\n" +
+                "\n" +
+                " ✅no warnings" +
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
@@ -107,7 +120,7 @@ public class Flinkbot {
             return pr.getComments().stream().anyMatch(comment -> {
                 // call getUserName() to avoid an additional API request
                 if (comment.getUserName().equals(gh.getBotName())) {
-                    // check if message is the same.
+                    // runCheck if message is the same.
                     String body = comment.getBody();
                     return isTrackingMessage(body);
                 }
@@ -160,7 +173,7 @@ public class Flinkbot {
                         }
                     });
 
-                    updatePullRequestThread(commentsAndReviews);
+                    updatePullRequestThread(boundPR, commentsAndReviews);
                 } else {
                     // we will not do anything with this notification.
                     LOG.debug("Marking notification with reason '{}' and title '{}' as read", thread.getReason(), thread.getTitle());
@@ -174,7 +187,8 @@ public class Flinkbot {
     }
 
 
-    /*private */ void updatePullRequestThread(List<GHObject> comments) {
+
+    /*private */ void updatePullRequestThread(GHPullRequest pullRequest, List<GHObject> comments) {
         if(comments == null) {
             LOG.warn("Notification without comments");
             return;
@@ -295,6 +309,7 @@ public class Flinkbot {
             // generate comment
             StringBuffer newComment = new StringBuffer();
             String[] messageLines = trackingMessage.split("\n");
+            boolean updateWarnings = false;
             for(String line: messageLines) {
                 // decide whether we add something
                 boolean tick = false;
@@ -326,7 +341,7 @@ public class Flinkbot {
                         addAttentionToReviewers(attention, trackingComment.getParent().getNumber());
                     }
                 }
-                // copy the original line
+                // (conditionally) copy the original line
                 if(tick) {
                     if (attentionTick) {
                         newComment.append(line.replace("❓", "❗"));
@@ -334,7 +349,27 @@ public class Flinkbot {
                         newComment.append(line.replace("❓", "✅"));
                     }
                 } else {
-                    newComment.append(line);
+                    //normal behavior
+                    if(!updateWarnings) {
+                        newComment.append(line);
+                    }
+                }
+
+                // set updateWarnings flag appropriately (to statically generate the warnings section)
+                if(line.contains("Last runCheck on commit")) {
+                    // extract from a string like:
+                    // Last runCheck on commit 6586e48ad887669dbb14c26440964a913176ac12 (Fri, May 24, 2pm CET)
+                    Matcher matcher = GET_SHA_PATTERN.matcher(line);
+                    matcher.find();
+                    String lastCheckSha = matcher.group(1);
+                    if(!lastCheckSha.equals(pullRequest.getHead().getSha())) {
+                        updateWarnings = true; // this will ignore the existing warning lines
+                        newComment.append(generateWarningsSection(pullRequest, comments)); // This appends new warning lines
+                    }
+                }
+
+                if(line.contains("## Review Progress")) {
+                    updateWarnings = false;
                 }
 
                 newComment.append("\n");
@@ -372,6 +407,29 @@ public class Flinkbot {
             }
         }
         updateLabels(trackedApprovals, trackingComment.getParent().getNumber());
+    }
+
+    private String generateWarningsSection(GHPullRequest pullRequest, List<GHObject> comments) {
+
+        List<String> warnings = new ArrayList<>();
+        for(PullRequestCheck check: PULL_REQUEST_CHECK) {
+            warnings.add(check.runCheck(pullRequest, comments));
+        }
+
+        StringBuffer section = new StringBuffer();
+        section.append("Last runCheck on commit " + pullRequest.getHead().getSha() + " (" + new Date() + ")\n\n");
+        if(warnings.size() == 0) {
+            section.append(" ✅no warnings");
+        } else {
+            section.append("**Warnings:**\n");
+            for(String warning: warnings) {
+                section.append(" * ");
+                section.append(warning);
+                section.append("\n");
+            }
+        }
+
+        return section.toString();
     }
 
     /**
