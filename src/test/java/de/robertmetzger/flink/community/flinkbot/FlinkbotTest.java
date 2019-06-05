@@ -3,6 +3,7 @@ package de.robertmetzger.flink.community.flinkbot;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.kohsuke.github.*;
 import org.mockito.ArgumentCaptor;
@@ -13,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -419,6 +422,15 @@ public class FlinkbotTest {
         verify((GHIssueComment)comments.get(0), never()).update(any());
     }
 
+    @Test
+    public void testRegex() {
+        String input = "Last runCheck on commit 6586e48ad887669dbb14c26440964a913176ac12 (Fri, May 24, 2pm CET)";
+        Pattern GET_SHA_PATTERN = Pattern.compile(".* ([a-z0-9]{40}) \\(.*\\)");
+        Matcher match = GET_SHA_PATTERN.matcher(input);
+
+        Assert.assertEquals("6586e48ad887669dbb14c26440964a913176ac12", match.group(1));
+    }
+
     // ------------------------------------ testing tools ------------------------------------
 
     private static GHIssueComment createComment(String body, String user) {
@@ -478,5 +490,6 @@ public class FlinkbotTest {
                 .map(GHLabel::getName)
                 .collect(Collectors.joining(","));
     }
+
 
 }

@@ -45,7 +45,7 @@ Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-pr
 
 ### Feature requests
 
-* [ ] could it add the mentioned person to `reviewers`, when using `@flinkbot attention`
+* [x] could it add the mentioned person to `reviewers`, when using `@flinkbot attention`
 * [x] could it tick the boxes?
 * [x] support `approve all`
 * [ ] if the bot is mentioned in a thread without a tracking message: post one (limit to configured repo)
@@ -61,6 +61,7 @@ Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-pr
 * [ ] approved / pending / rejected states for each step
 * [ ] detect special pull requests
     hotfixes, documentation only, new contributors
+* [ ] BUG: don't re-request reviews once review is done: https://github.com/apache/flink/pull/8210
 
 
 ## Future projects
