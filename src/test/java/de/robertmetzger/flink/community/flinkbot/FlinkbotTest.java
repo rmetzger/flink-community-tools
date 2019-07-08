@@ -32,7 +32,7 @@ public class FlinkbotTest {
             "* ❓ 5. Overall code [quality] is good.\n";
 
     private static final String TRACKING_MESSAGE_2 =                 "\n" +
-            "Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) for a full explanation " +
+            "Please see the [Pull Request Review Guide](https://flink.apache.org/contributing/reviewing-prs.html) for a full explanation " +
             "of the review process." +
             "<details>\n" +
             " The Bot is tracking the review progress through labels. Labels are applied according to the order of the review items. " +
