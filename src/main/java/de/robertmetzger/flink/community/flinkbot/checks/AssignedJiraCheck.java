@@ -1,4 +1,4 @@
-package de.robertmetzger.flink.community.flinkbot;
+package de.robertmetzger.flink.community.flinkbot.checks;
 
 
 import com.atlassian.jira.rest.client.api.IssueRestClient;
@@ -7,6 +7,8 @@ import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.auth.AnonymousAuthenticationHandler;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import com.atlassian.util.concurrent.Promise;
+import de.robertmetzger.flink.community.flinkbot.Flinkbot;
+import de.robertmetzger.flink.community.flinkbot.PullRequestCheck;
 import org.kohsuke.github.GHObject;
 import org.kohsuke.github.GHPullRequest;
 import org.slf4j.Logger;
@@ -23,31 +25,46 @@ public class AssignedJiraCheck implements PullRequestCheck {
     private static Logger LOG = LoggerFactory.getLogger(Flinkbot.class);
 
     private static Pattern pattern = Pattern.compile("(?i).*(FLINK-[0-9]+).*");
-    private final IssueRestClient issueClient;
+    private IssueRestClient issueClient;
 
-    public AssignedJiraCheck() throws URISyntaxException {
-        LOG.info("Creating new JIRA REST client");
-        AsynchronousJiraRestClientFactory factory = new AsynchronousJiraRestClientFactory();
-        JiraRestClient restClient = factory.create(new URI("https://issues.apache.org/jira"), new AnonymousAuthenticationHandler());
-        this.issueClient = restClient.getIssueClient();
+    public AssignedJiraCheck() {
+
     }
 
+    private IssueRestClient getIssueClient() {
+        if(issueClient != null) {
+            return this.issueClient;
+        }
+        LOG.info("Creating new JIRA REST client");
+        AsynchronousJiraRestClientFactory factory = new AsynchronousJiraRestClientFactory();
+        JiraRestClient restClient = null;
+        try {
+            restClient = factory.create(new URI("https://issues.apache.org/jira"), new AnonymousAuthenticationHandler());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("URI wrong", e);
+        }
+        this.issueClient = restClient.getIssueClient();
+        return issueClient;
+    }
 
     @Override
     public String runCheck(GHPullRequest pullRequest, List<GHObject> comments) {
         String prTitle = pullRequest.getTitle();
         String jiraId = extractJiraId(prTitle);
         if(jiraId == null && !prTitle.contains("hotfix")) {
-            return "Invalid pull request title: No valid Jira ID provided";
+            return "**Invalid pull request title: No valid Jira ID provided**";
         }
         // we've got a valid JIRA id: Check if it is assigned.
         try {
-            Issue jiraIssue = issueClient.getIssue(jiraId).get();
+            Issue jiraIssue = getIssueClient().getIssue(jiraId).get();
             if(jiraIssue.getAssignee() == null) {
-                return "This pull request references an unassigned [Jira ticket](https://issues.apache.org/jira/browse/"+jiraId+").";
+                return "**This pull request references an unassigned [Jira ticket](https://issues.apache.org/jira/browse/"+jiraId+").** " +
+                        "According to the [code contribution guide](https://flink.apache.org/contributing/contribute-code.html), " +
+                        "tickets need to be assigned before starting with the implementation work.";
             }
         } catch (Throwable e) {
             LOG.warn("Unable to get Jira issue " + jiraId, e);
+            this.issueClient = null;
         }
         return null;
     }

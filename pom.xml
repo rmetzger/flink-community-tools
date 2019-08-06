@@ -26,7 +26,15 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
+      <repository>
+        <id>spring-public</id>
+        <url>https://repo.spring.io/plugins-release</url>
+        <releases>
+          <enabled>true</enabled>
+        </releases>
+      </repository>
     </repositories>
+
 
   <dependencies>
     <dependency>

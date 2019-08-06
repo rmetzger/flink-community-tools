@@ -80,12 +80,10 @@ public class Github {
     /**
      * Gets all open pull requests (treated as issues)
      */
-    public List<GHIssue> getAllPullRequests() {
+    public List<GHPullRequest> getAllPullRequests() {
         try {
             GHRepository repo = cachedGitHub.getRepository(repository);
-            List<GHIssue> allIssues = repo.getIssues(GHIssueState.OPEN);
-            // remove issues, keep PRs
-            allIssues.removeIf(issue -> !issue.isPullRequest());
+            List<GHPullRequest> allIssues = repo.getPullRequests(GHIssueState.OPEN);
             allIssues.removeIf(issue -> issue.getNumber() < minPRNumber);
             return allIssues;
         } catch (IOException e) {

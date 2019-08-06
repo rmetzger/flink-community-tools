@@ -1,5 +1,8 @@
 package de.robertmetzger.flink.community.flinkbot;
 
+import de.robertmetzger.flink.community.flinkbot.checks.AssignedJiraCheck;
+import de.robertmetzger.flink.community.flinkbot.checks.DocumentationCheck;
+import de.robertmetzger.flink.community.flinkbot.checks.PomChangesCheck;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.*;
@@ -56,9 +59,7 @@ public class Flinkbot {
                 "\n" +
                 "## Automated Checks" +
                 "\n" +
-                "Last runCheck on commit xxx (Fri, May 24, 2pm CET)\n" +
-                "\n" +
-                " ✅no warnings" +
+                "##CHECKS PLACEHOLDER##" +
                 "\n" +
                 "## Review Progress\n" +
                 "\n" +
@@ -94,7 +95,7 @@ public class Flinkbot {
      * The method is synchronized, to avoid multiple threads concurrently processing new PRs.
      */
     public synchronized void checkForNewPRs() {
-        List<GHIssue> prs = gh.getAllPullRequests();
+        List<GHPullRequest> prs = gh.getAllPullRequests();
         // remove all PRs we've commented on already
         prs.removeIf(pr -> {
             // LOG.debug("Checking PR " + pullToSimpleString(pr));
@@ -102,10 +103,11 @@ public class Flinkbot {
         });
 
         // put comment
-        for (GHIssue pr : prs) {
+        for (GHPullRequest pr : prs) {
             LOG.info("Commenting with tracking message on PR " + pullToSimpleString(pr));
             try {
-                pr.comment(trackingMessage);
+                String customTracking = trackingMessage.replace("##CHECKS PLACEHOLDER##", generateWarningsSection(pr, new ArrayList<>()));
+                pr.comment(customTracking);
                 // add label
                 updateLabels(Collections.EMPTY_MAP, pr.getNumber());
             } catch (IOException e) {
@@ -115,12 +117,12 @@ public class Flinkbot {
         LOG.info("Done checking for new PRs. Requests remaining: " + gh.getRemainingRequests() +" Write requests " + gh.getRemainingWriteRequests());
     }
 
-    private boolean pullRequestHasComment(GHIssue pr) {
+    private boolean pullRequestHasComment(GHPullRequest pr) {
         try {
             return pr.getComments().stream().anyMatch(comment -> {
                 // call getUserName() to avoid an additional API request
                 if (comment.getUserName().equals(gh.getBotName())) {
-                    // runCheck if message is the same.
+                    // Check if message is the same.
                     String body = comment.getBody();
                     return isTrackingMessage(body);
                 }
@@ -341,6 +343,18 @@ public class Flinkbot {
                         addAttentionToReviewers(attention, trackingComment.getParent().getNumber());
                     }
                 }
+
+                // set updateWarnings flag appropriately (to statically generate the warnings section)
+                if(line.contains("##CHECKS PLACEHOLDER##")) {
+                    // extract from a string like:
+                    updateWarnings = true; // this will ignore the existing warning lines
+                    newComment.append(generateWarningsSection(pullRequest, comments)); // This appends new warning lines
+                }
+
+                if(line.contains("## Review Progress")) {
+                    updateWarnings = false;
+                }
+
                 // (conditionally) copy the original line
                 if(tick) {
                     if (attentionTick) {
@@ -355,22 +369,7 @@ public class Flinkbot {
                     }
                 }
 
-                // set updateWarnings flag appropriately (to statically generate the warnings section)
-                if(line.contains("Last runCheck on commit")) {
-                    // extract from a string like:
-                    // Last runCheck on commit 6586e48ad887669dbb14c26440964a913176ac12 (Fri, May 24, 2pm CET)
-                    Matcher matcher = GET_SHA_PATTERN.matcher(line);
-                    matcher.find();
-                    String lastCheckSha = matcher.group(1);
-                    if(!lastCheckSha.equals(pullRequest.getHead().getSha())) {
-                        updateWarnings = true; // this will ignore the existing warning lines
-                        newComment.append(generateWarningsSection(pullRequest, comments)); // This appends new warning lines
-                    }
-                }
 
-                if(line.contains("## Review Progress")) {
-                    updateWarnings = false;
-                }
 
                 newComment.append("\n");
                 if(nextLine != null) {
@@ -410,14 +409,16 @@ public class Flinkbot {
     }
 
     private String generateWarningsSection(GHPullRequest pullRequest, List<GHObject> comments) {
-
         List<String> warnings = new ArrayList<>();
         for(PullRequestCheck check: PULL_REQUEST_CHECK) {
-            warnings.add(check.runCheck(pullRequest, comments));
+            String result = check.runCheck(pullRequest, comments);
+            if (result != null) {
+                warnings.add(result);
+            }
         }
 
         StringBuffer section = new StringBuffer();
-        section.append("Last runCheck on commit " + pullRequest.getHead().getSha() + " (" + new Date() + ")\n\n");
+        section.append("Last check on commit " + pullRequest.getHead().getSha() + " (" + new Date() + ")\n\n");
         if(warnings.size() == 0) {
             section.append(" ✅no warnings");
         } else {
@@ -429,6 +430,7 @@ public class Flinkbot {
             }
         }
 
+        section.append("\n\n<sub>Mention the bot in a comment to re-run the automated checks.</sub>");
         return section.toString();
     }
 

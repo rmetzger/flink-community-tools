@@ -1,5 +1,6 @@
-package de.robertmetzger.flink.community.flinkbot;
+package de.robertmetzger.flink.community.flinkbot.checks;
 
+import de.robertmetzger.flink.community.flinkbot.PullRequestCheck;
 import org.kohsuke.github.GHObject;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHPullRequestFileDetail;
