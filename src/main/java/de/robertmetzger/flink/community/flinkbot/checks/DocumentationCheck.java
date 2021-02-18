@@ -14,10 +14,13 @@ public class DocumentationCheck implements PullRequestCheck {
         int zhMdFiles = 0;
         List<GHPullRequestFileDetail> files = pullRequest.listFiles().asList();
         for(GHPullRequestFileDetail file: files) {
-            if(file.getFilename().endsWith(".md")) {
+            if (!file.getFilename().endsWith(".md")) {
+                continue;
+            }
+            if(file.getFilename().contains("docs/content/")) {
                 mdFiles++;
             }
-            if(file.getFilename().endsWith(".zh.md")) {
+            if(file.getFilename().contains("docs/content.zh/")) {
                 zhMdFiles++;
             }
         }
@@ -25,7 +28,7 @@ public class DocumentationCheck implements PullRequestCheck {
             return "No documentation files were touched! Remember to keep the Flink docs up to date!";
         }
         if(mdFiles > 0 && zhMdFiles == 0) {
-            return "Documentation files were touched, but no `.zh.md` files: Update Chinese documentation or file Jira ticket.";
+            return "Documentation files were touched, but no `docs/content.zh/` files: Update Chinese documentation or file Jira ticket.";
         } else {
             return null;
         }
