@@ -1,3 +1,3 @@
 #!/bin/bash
 
-mvn exec:java
+MAVEN_OPTS="-Xmx2G"  mvn exec:java
